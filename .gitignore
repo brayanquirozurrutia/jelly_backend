@@ -264,47 +264,15 @@ out/
 # JIRA plugin
 atlassian-ide-plugin.xml
 
-# Python #
-*$py.class
-
 # Distribution / packaging
 .Python build/
 *.whl
-.installed.cfg
-*.egg
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-
-# Jupyter Notebook
-.ipynb_checkpoints
 
 # pyenv
 .python-version
 
 # celery
 celerybeat-schedule.*
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-
-# mkdocs documentation
-/site
 
 # Sublime Text #
 *.tmlanguage.cache
