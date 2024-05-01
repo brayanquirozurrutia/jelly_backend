@@ -1,0 +1,1 @@
+OUATH_TAG = ['OAuth']
