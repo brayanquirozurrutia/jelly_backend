@@ -1,6 +1,7 @@
+from datetime import datetime
 from rest_framework import serializers
-
-from jelly_backend.utils import valida_rut
+from dateutil.relativedelta import relativedelta
+from jelly_backend.utils.utils import valida_rut
 from users.models import User
 
 
@@ -75,6 +76,14 @@ class UserSerializer(serializers.ModelSerializer):
         # We verify that the passwords match
         if data['password'] != data['password_2']:
             raise serializers.ValidationError("Las contraseñas no coinciden.")
+        # We verify that the user is of legal age
+        birth_date = data['birth_date']
+        age = relativedelta(datetime.now(), birth_date).years
+        if age < 15:
+            raise serializers.ValidationError("Debes ser mayor de edad para registrarte.")
+        # We verify that the age is not greater than 100
+        if age > 100:
+            raise serializers.ValidationError("Debes ingresar una edad válida.")
         return data
 
     # We create the user
