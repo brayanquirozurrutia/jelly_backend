@@ -29,7 +29,26 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    GENDER_CHOICES = (('M', 'Masculino'), ('F', 'Femenino'), ('O', 'Otro'))
+    """
+    Custom user model.
+
+    The status choices are:
+    - Registered: User is registered but not active (email verification pending)
+    - Active: User is active (email verified)
+    - Blocked: User is blocked by the administrator (can log in but cannot perform any action)
+    - Deleted: User is deleted by the administrator (cannot log in)
+    """
+    GENDER_CHOICES = (
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+        ('O', 'Otro')
+    )
+    STATUS_CHOICES = (
+        ('R', 'Registered'),
+        ('A', 'Active'),
+        ('B', 'Blocked'),
+        ('D', 'Deleted'),
+    )
 
     password = models.CharField(_('password'), editable=False, blank=False, null=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, blank=False, null=False, editable=False)
@@ -43,6 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_picture = models.URLField(blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='O', blank=False, null=False)
     birth_date = models.DateField(blank=True, null=True)
+    user_status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R', blank=False, null=False)
 
     objects = CustomUserManager()
 

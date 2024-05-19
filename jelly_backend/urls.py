@@ -32,6 +32,7 @@ apps_urlpatterns = [
     path('admin/', admin.site.urls),
     path(API_VERSION_1, include('oauth_app.urls')),
     path(API_VERSION_1, include('users.urls')),
+    path(API_VERSION_1, include('users_tokens.urls')),
 ]
 
 debug_urlpatterns = [
