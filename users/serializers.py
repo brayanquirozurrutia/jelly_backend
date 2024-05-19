@@ -90,4 +90,5 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_2')
         user = User.objects.create_user(**validated_data)
+        self.instance = user
         return user
