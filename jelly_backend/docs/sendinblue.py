@@ -4,8 +4,11 @@
 
 lists = {
     'Accounts Created': 3,
+    'Accounts Activated': 5,
 }
 
 email_templates = {
-    'Welcome Email': 1,
+    'Welcome Email': 4,
+    'Account Activation Email': 2,
+    'Account activated Email': 3,
 }

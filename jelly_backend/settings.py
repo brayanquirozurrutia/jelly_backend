@@ -25,6 +25,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # Application definition
 
 INSTALLED_APPS = [
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,8 +38,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'oauth2_provider',
+    # Custom apps
     'users',
     'oauth_app',
+    'users_tokens',
 ]
 
 MIDDLEWARE = [
