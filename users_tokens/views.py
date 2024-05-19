@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from users_tokens.serializers import AccountActivationTokenActivateAccountSerializer
 from jelly_backend.utils.email_utils import SendinblueClient
 from users.models import User
+from jelly_backend.docs.swagger_tags import ACCOUNT_ACTIVATION_TOKEN_TAG
 
 
 class AccountActivationTokenActivateAccountAPIView(APIView):
@@ -13,9 +14,22 @@ class AccountActivationTokenActivateAccountAPIView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        operation_description="""
+        ## Activate the account with the token
+        
+        About the endpoint:
+        
+        - This endpoint activates the account with the token.
+        
+        - The user will receive an email with the welcome email.
+        
+        - The user will receive an email with the account activated email.
+        """,
+        operation_id="Activate account",
+        tags=ACCOUNT_ACTIVATION_TOKEN_TAG,
+        operation_summary="Activate the account with the token",
         request_body=AccountActivationTokenActivateAccountSerializer,
         responses={200: "The account has been activated."},
-        operation_description="Activate the account with the token",
     )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

@@ -3,8 +3,8 @@ import os
 import sib_api_v3_sdk
 
 from dotenv import load_dotenv
-from jelly_backend.docs.sendinblue import lists, email_templates
 from pprint import pprint
+from jelly_backend.docs.sendinblue import lists, email_templates
 from sib_api_v3_sdk.rest import ApiException
 
 load_dotenv()
