@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from users.serializers import UserSerializer
 from jelly_backend.utils.email_utils import SendinblueClient
+from jelly_backend.docs.swagger_tags import USER_TAG
 
 
 class UserCreateAPIView(APIView):
@@ -12,9 +13,19 @@ class UserCreateAPIView(APIView):
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
+        operation_description="""
+        ## Create a new user
+        
+        About the endpoint:
+        
+        - This endpoint creates a new user in the system. The user will be created with the status of inactive.
+        
+        - The user will receive an email with a link to activate the account.""",
+        operation_id="Create user",
+        tags=USER_TAG,
+        operation_summary="Create a new user",
         request_body=UserSerializer,
         responses={201: UserSerializer()},
-        operation_description="Create a new user",
     )
     def post(self, request, *args, **kwargs):
         """
