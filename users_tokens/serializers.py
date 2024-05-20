@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from users_tokens.models import AccountActivationToken
+from users_tokens.models import AccountActivationToken, PasswordResetToken
 from users.models import User
 
 
@@ -99,3 +99,113 @@ class AccountActivationTokenNewTokenSerializer(serializers.ModelSerializer):
                     return account_activation_token_obj
         self.instance = None
         return None
+
+
+class PasswordResetTokenNewTokenSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating a new password reset token
+    New token is created when only if the user exists and is registered
+    """
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        model = PasswordResetToken
+        fields = [
+            'email',
+        ]
+
+    # We clean the data before
+    @staticmethod
+    def validate_email(email):
+        return email.lower().strip()
+
+    def save(self, **kwargs):
+        email = self.validated_data['email']
+        user_obj = User.objects.filter(email=email).first()
+        if user_obj:
+            with transaction.atomic():
+                # We create a new token
+                password_reset_token_obj = PasswordResetToken.create_new_token(
+                    user=user_obj
+                )
+                self.instance = password_reset_token_obj
+                return password_reset_token_obj
+        self.instance = None
+        return None
+
+
+class PasswordResetTokenResetPasswordSerializer(serializers.ModelSerializer):
+    """
+    Serializer for resetting the password with the token
+    """
+    password_reset_token = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True)
+    password_2 = serializers.CharField(required=True)
+
+    class Meta:
+        model = PasswordResetToken
+        fields = [
+            'password_reset_token',
+            'email',
+            'password',
+            'password_2'
+        ]
+
+    # We clean the data before
+    @staticmethod
+    def validate_email(email):
+        return email.lower().strip()
+
+    @staticmethod
+    def validate_password_reset_token(password_reset_token):
+        return password_reset_token.strip()
+
+    @staticmethod
+    def validate_password(password):
+        return password.strip()
+
+    @staticmethod
+    def validate_password_2(password_2):
+        return password_2.strip()
+
+    # We validate the token
+    def validate(self, attrs):
+        password_reset_token = attrs['password_reset_token']
+        email = attrs['email']
+        # We verify that the token is valid and that it is associated with the email
+        password_reset_token_obj = PasswordResetToken.objects.filter(
+            code=password_reset_token,
+            user__email=email
+        ).first()
+        if not password_reset_token_obj:
+            raise serializers.ValidationError("El token no es válido.")
+        # We verify that the token has not expired
+        if password_reset_token_obj.is_expired:
+            raise serializers.ValidationError("El token ha expirado.")
+        # We verify that the passwords match
+        password = attrs['password']
+        password_2 = attrs['password_2']
+        if password != password_2:
+            raise serializers.ValidationError("Las contraseñas no coinciden.")
+        return attrs
+
+    def save(self, **kwargs):
+        # We reset the password and delete the token associated with it
+        password_reset_token = self.validated_data['password_reset_token']
+        email = self.validated_data['email']
+        password = self.validated_data['password']
+        try:
+            password_reset_token_obj = PasswordResetToken.objects.get(
+                code=password_reset_token,
+                user__email=email
+            )
+            with transaction.atomic():
+                password_reset_token_obj.user.set_password(password)
+                password_reset_token_obj.user.save()
+                password_reset_token_obj.delete()
+            self.instance = password_reset_token_obj
+            return password_reset_token_obj
+        except PasswordResetToken.DoesNotExist:
+            self.instance = None
+            return None

@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
-from users.serializers import UserSerializer
+from users.serializers import (
+    UserSerializer
+)
 from jelly_backend.utils.email_utils import SendinblueClient
 from jelly_backend.docs.swagger_tags import USER_TAG
 

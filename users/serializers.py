@@ -6,6 +6,9 @@ from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the User model.
+    """
     password = serializers.CharField(required=True, write_only=True)
     password_2 = serializers.CharField(required=True, write_only=True)
     rut = serializers.CharField(required=True)
