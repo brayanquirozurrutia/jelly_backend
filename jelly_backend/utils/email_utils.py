@@ -159,3 +159,59 @@ class SendinblueClient:
             pprint(api_response)
         except ApiException as e:
             print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
+
+    def send_forgot_password_email(self, email: str, first_name: str, reset_code: str) -> None:
+        """
+        Sends a forgot password email to a user.
+        :param email: The email of the user.
+        :param first_name: The first name of the user.
+        :param reset_code: The reset code.
+        :return: None
+        """
+        # We update the contact with the reset code
+        self.update_contact(
+            email=email,
+            attributes={
+                'RESET_PASSWORD_CODE': reset_code
+            }
+        )
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": email}],
+            template_id=email_templates['Forgot Password Email'],
+            params={
+                'NOMBRE': first_name,
+                'RESET_PASSWORD_CODE': reset_code
+            }
+        )
+        try:
+            api_response = self.emails_api.send_transac_email(send_smtp_email)
+            pprint(api_response)
+        except ApiException as e:
+            print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
+
+    def send_password_changed_email(self, email: str, first_name: str) -> None:
+        """
+        Sends a password changed email to a user.
+        :param email: The email of the user.
+        :param first_name: The first name of the user.
+        :return: None
+        """
+        # We update the contact
+        self.update_contact(
+            email=email,
+            attributes={
+                'RESET_PASSWORD_CODE': 0
+            }
+        )
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": email}],
+            template_id=email_templates['Password Changed Email'],
+            params={
+                'NOMBRE': first_name
+            }
+        )
+        try:
+            api_response = self.emails_api.send_transac_email(send_smtp_email)
+            pprint(api_response)
+        except ApiException as e:
+            print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)

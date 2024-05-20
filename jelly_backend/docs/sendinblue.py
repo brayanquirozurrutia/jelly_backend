@@ -11,4 +11,6 @@ email_templates = {
     'Welcome Email': 4,
     'Account Activation Email': 2,
     'Account activated Email': 3,
+    'Forgot Password Email': 5,
+    'Password Changed Email': 6,
 }
