@@ -1,0 +1,98 @@
+# Excluir el archivo .env para evitar copiar información sensible al contenedor
+.env
+
+# Excluir archivos y directorios de virtual environments
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Excluir archivos de backup y temporales
+*.bak
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+*.sqlite3-journal
+pip-selfcheck.json
+
+# Excluir archivos de configuración local y secretos
+local_settings.py
+instance/
+.sftp-config.json
+
+# Excluir archivos de empaquetado y construcción
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+target/
+
+# Excluir cachés y archivos de configuración de herramientas
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+
+# Excluir archivos de documentación generados
+docs/_build/
+
+# Excluir configuraciones específicas del editor/IDE
+.idea/
+.vscode/
+.history
+
+# Excluir archivos específicos del sistema operativo
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
