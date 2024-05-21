@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -156,3 +157,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 AUTH_USER_MODEL = 'users.User'
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}

@@ -1,13 +1,14 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from users.serializers import (
-    UserSerializer
+    UserSerializer, UserLoginSerializer
 )
 from jelly_backend.utils.email_utils import SendinblueClient
 from jelly_backend.docs.swagger_tags import USER_TAG
+from users.models import User
 
 
 class UserCreateAPIView(APIView):
@@ -58,3 +59,62 @@ class UserCreateAPIView(APIView):
             activation_code=account_activation_token
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserLoginAPIView(APIView):
+    serializer_class = UserLoginSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Login
+        
+        About the endpoint:
+        
+        - This endpoint allows a user to login to the system.
+        
+        - The user must provide their email and password to login.
+        
+        - The user must have an active account to login.""",
+        operation_id="Login",
+        tags=USER_TAG,
+        operation_summary="Login",
+        request_body=UserLoginSerializer,
+        responses={200: UserLoginSerializer()},
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Login.
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.save()
+        return Response(data, status=status.HTTP_200_OK)
+
+
+# PARA TESTEAR COSAS
+class ListUsersAPIView(viewsets.ViewSet):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## List users
+        
+        About the endpoint:
+        
+        - This endpoint lists all the users in the system.
+        
+        - The users are listed in a paginated way.""",
+        operation_id="List users",
+        tags=USER_TAG,
+        operation_summary="List users",
+        responses={200: UserSerializer(many=True)},
+    )
+    def list(self, request):
+        """
+        List users.
+        """
+        queryset = User.objects.all()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
