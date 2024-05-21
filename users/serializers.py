@@ -3,6 +3,7 @@ from rest_framework import serializers
 from dateutil.relativedelta import relativedelta
 from jelly_backend.utils.utils import valida_rut
 from users.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -95,3 +96,63 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         self.instance = user
         return user
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the login of the User model.
+    """
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.EmailField(required=True, write_only=True)
+    password = serializers.CharField(required=True, write_only=True)
+    access_token = serializers.CharField(read_only=True)
+    refresh_token = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'password',
+            'access_token',
+            'refresh_token',
+        ]
+
+    @staticmethod
+    def validate_email(email):
+        return email.lower().strip()
+
+    @staticmethod
+    def validate_password(password):
+        return password.strip()
+
+    # We validate the data
+    def validate(self, attrs):
+        email = attrs['email']
+        password = attrs['password']
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            raise serializers.ValidationError("El email o la contraseña son incorrectos.")
+        if not user.check_password(password):
+            raise serializers.ValidationError("El email o la contraseña son incorrectos.")
+        # We check if the user is active
+        if user.user_status != 'A':
+            raise serializers.ValidationError("El usuario no está activo.")
+        self.instance = user
+        return attrs
+
+    def save(self, **kwargs):
+        # We obtain the user
+        user = self.instance
+        # We generate the tokens
+        refresh = RefreshToken.for_user(user)
+        # We update the last login
+        user.last_login = datetime.now()
+        user.save()
+        # We return the data
+        self.instance = user
+        return {
+            'id': user.id,
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh),
+        }
