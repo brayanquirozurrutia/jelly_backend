@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     # Custom apps
-    'users',
     'oauth_app',
+    'jwt_app',
+    'users',
     'users_tokens',
 ]
 
