@@ -6,12 +6,6 @@ from django.urls import path, include, re_path
 from drf_yasg.views import get_schema_view
 from rest_framework.permissions import AllowAny
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
-
 schema_view = get_schema_view(
     openapi.Info(
         title="Jelly API",
@@ -28,43 +22,20 @@ schema_view = get_schema_view(
 
 API_VERSION_1 = "jelly/v1/"
 
-apps_urlpatterns = [
+urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
+    # API
     path(API_VERSION_1, include('oauth_app.urls')),
+    path(API_VERSION_1, include('jwt_app.urls')),
     path(API_VERSION_1, include('users.urls')),
     path(API_VERSION_1, include('users_tokens.urls')),
-]
-
-debug_urlpatterns = [
-    path(r"__debug__/", include(debug_toolbar.urls)),
-]
-
-swagger_urlpatterns = [
-    re_path(
-        r"^swagger(?P<format>\.json|\.yaml)$",
-        schema_view.without_ui(cache_timeout=0),
-        name="schema-json",
-    ),
-    re_path(
-        r"^swagger/$",
-        schema_view.with_ui("swagger", cache_timeout=0),
-        name="schema-swagger-ui",
-    ),
-    path(
-        "redoc/",
-        schema_view.with_ui("redoc", cache_timeout=0),
-        name="schema-redoc",
-    ),
-]
-
-token_urlpatterns = [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-]
-
-oauth_urlpatterns = [
+    # Debug
+    path("__debug__/", include(debug_toolbar.urls)),
+    # Swagger
+    re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    # OAuth2
     re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
-
-urlpatterns = apps_urlpatterns + debug_urlpatterns + swagger_urlpatterns + token_urlpatterns + oauth_urlpatterns
