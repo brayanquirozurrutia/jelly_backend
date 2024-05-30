@@ -29,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
             'gender',
             'birth_date',
             'password_2',
+            'nickname',
         ]
 
         read_only_fields = [
@@ -42,11 +43,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_first_name(first_name):
-        return first_name.lower().strip().capitalize()
+        return first_name.strip().capitalize()
 
     @staticmethod
     def validate_last_name(last_name):
-        return last_name.lower().strip().capitalize()
+        return last_name.strip().capitalize()
 
     @staticmethod
     def validate_email(email):
@@ -63,6 +64,10 @@ class UserSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_password_2(password_2):
         return password_2.strip()
+
+    @staticmethod
+    def validate_nickname(nickname):
+        return nickname.strip().capitalize()
 
     # We validate the data
     def validate(self, attrs):

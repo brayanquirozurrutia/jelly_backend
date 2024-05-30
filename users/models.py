@@ -63,6 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='O', blank=False, null=False)
     birth_date = models.DateField(blank=True, null=True)
     user_status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R', blank=False, null=False)
+    nickname = models.CharField(max_length=30, blank=True, null=True)
 
     objects = CustomUserManager()
 
@@ -80,3 +81,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    def get_full_name(self):
+        if self.nickname:
+            return self.nickname
+        return f"{self.first_name} {self.last_name}"

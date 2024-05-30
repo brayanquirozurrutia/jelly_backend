@@ -44,10 +44,12 @@ class UserCreateAPIView(APIView):
         # We send the activation email
         sendinblue_client = SendinblueClient()
         # First we create the contact in Sendinblue
+        user_obj = serializer.instance
         sendinblue_client.create_contact(
             email=serializer.validated_data['email'],
-            first_name=serializer.validated_data['first_name'],
-            last_name=serializer.validated_data['last_name']
+            full_name=user_obj.get_full_name(),
+            first_name=user_obj.first_name,
+            last_name=user_obj.last_name
         )
         # Second we add the contact to the list
         sendinblue_client.add_contact_to_list(
@@ -55,7 +57,7 @@ class UserCreateAPIView(APIView):
         )
         sendinblue_client.activate_account_email(
             email=serializer.validated_data['email'],
-            first_name=serializer.validated_data['first_name'],
+            full_name=user_obj.get_full_name(),
             activation_code=account_activation_token
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
