@@ -47,17 +47,13 @@ class AccountActivationTokenActivateAccountAPIView(APIView):
         sendinblue_client = SendinblueClient()
         # We get the user
         user_obj = User.objects.get(email=serializer.validated_data['email'])
-        first_name = user_obj.first_name
-        last_name = user_obj.last_name
         sendinblue_client.send_account_activated_email(
             email=serializer.validated_data['email'],
-            first_name=first_name,
-            last_name=user_obj.last_name
+            full_name=user_obj.get_full_name()
         )
         sendinblue_client.send_welcome_email(
             email=serializer.validated_data['email'],
-            first_name=first_name,
-            last_name=last_name
+            full_name=user_obj.get_full_name()
         )
         return Response("The account has been activated.", status=status.HTTP_200_OK)
 
@@ -97,7 +93,7 @@ class AccountActivationTokenNewTokenAPIView(APIView):
             first_name = user_obj.first_name
             sendinblue_client.activate_account_email(
                 email=serializer.validated_data['email'],
-                first_name=first_name,
+                full_name=user_obj.get_full_name(),
                 activation_code=account_activation_token_obj.code
             )
             return Response(
@@ -145,7 +141,7 @@ class PasswordResetTokenNewTokenAPIView(APIView):
             first_name = user_obj.first_name
             sendinblue_client.send_forgot_password_email(
                 email=serializer.validated_data['email'],
-                first_name=first_name,
+                full_name=user_obj.get_full_name(),
                 reset_code=password_reset_token_obj.code
             )
             return Response(
@@ -186,9 +182,8 @@ class PasswordResetTokenPasswordChangedAPIView(APIView):
         sendinblue_client = SendinblueClient()
         # We get the user
         user_obj = User.objects.get(email=serializer.validated_data['email'])
-        first_name = user_obj.first_name
         sendinblue_client.send_password_changed_email(
             email=serializer.validated_data['email'],
-            first_name=first_name
+            full_name=user_obj.get_full_name()
         )
         return Response("La contraseña ha sido reestablecida.", status=status.HTTP_200_OK)

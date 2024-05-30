@@ -28,10 +28,11 @@ class SendinblueClient:
         self.contacts_api = sib_api_v3_sdk.ContactsApi(sib_api_v3_sdk.ApiClient(self.configuration))
         self.emails_api = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(self.configuration))
 
-    def create_contact(self, email: str, first_name: str, last_name: str) -> None:
+    def create_contact(self, email: str, full_name: str, first_name: str, last_name: str) -> None:
         """
         Creates a new contact in Sendinblue.
         :param email: The email of the contact.
+        :param full_name: The full name of the contact.
         :param first_name: The first name of the contact.
         :param last_name: The last name of the contact.
         :return: None
@@ -39,6 +40,7 @@ class SendinblueClient:
         contact = sib_api_v3_sdk.CreateContact(
             email=email,
             attributes={
+                'FULL_NAME': full_name,
                 'NOMBRE': first_name,
                 'APELLIDOS': last_name
             }
@@ -79,11 +81,11 @@ class SendinblueClient:
         except ApiException as e:
             print("Exception when calling ContactsApi->add_contact_to_list: %s\n" % e)
 
-    def activate_account_email(self, email: str, first_name: str, activation_code: str) -> None:
+    def activate_account_email(self, email: str, full_name: str, activation_code: str) -> None:
         """
         Sends an activation email to a new user.
         :param email: The email of the user.
-        :param first_name: The first name of the user.
+        :param full_name: The full name of the user.
         :param activation_code: The activation code.
         :return: None
         """
@@ -99,7 +101,7 @@ class SendinblueClient:
             to=[{"email": email}],
             template_id=email_templates['Account Activation Email'],
             params={
-                'NOMBRE': first_name,
+                'FULL_NAME': full_name,
                 'ACTIVATE_ACCOUNT_CODE': activation_code
             }
         )
@@ -109,20 +111,18 @@ class SendinblueClient:
         except ApiException as e:
             print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
 
-    def send_welcome_email(self, email: str, first_name: str, last_name: str) -> None:
+    def send_welcome_email(self, email: str, full_name: str) -> None:
         """
         Sends a welcome email to a new user.
         :param email: The email of the user.
-        :param first_name: The first name of the user.
-        :param last_name: The last name of the user.
+        :param full_name: The full name of the user.
         :return: None
         """
         send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
             to=[{"email": email}],
             template_id=email_templates['Welcome Email'],
             params={
-                'NOMBRE': first_name,
-                'APELLIDOS': last_name
+                'FULL_NAME': full_name
             }
         )
         try:
@@ -131,12 +131,11 @@ class SendinblueClient:
         except ApiException as e:
             print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
 
-    def send_account_activated_email(self, email: str, first_name: str, last_name: str) -> None:
+    def send_account_activated_email(self, email: str, full_name: str) -> None:
         """
         Sends an account activated email to a user.
         :param email: The email of the user.
-        :param first_name: The first name of the user.
-        :param last_name: The last name of the user.
+        :param full_name: The full name of the user.
         :return: None
         """
         # We update the contact with the activation code
@@ -150,8 +149,7 @@ class SendinblueClient:
             to=[{"email": email}],
             template_id=email_templates['Account activated Email'],
             params={
-                'NOMBRE': first_name,
-                'APELLIDOS': last_name
+                'FULL_NAME': full_name
             }
         )
         try:
@@ -160,11 +158,11 @@ class SendinblueClient:
         except ApiException as e:
             print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
 
-    def send_forgot_password_email(self, email: str, first_name: str, reset_code: str) -> None:
+    def send_forgot_password_email(self, email: str, full_name: str, reset_code: str) -> None:
         """
         Sends a forgot password email to a user.
         :param email: The email of the user.
-        :param first_name: The first name of the user.
+        :param full_name: The full name of the user.
         :param reset_code: The reset code.
         :return: None
         """
@@ -179,7 +177,7 @@ class SendinblueClient:
             to=[{"email": email}],
             template_id=email_templates['Forgot Password Email'],
             params={
-                'NOMBRE': first_name,
+                'FULL_NAME': full_name,
                 'RESET_PASSWORD_CODE': reset_code
             }
         )
@@ -189,11 +187,11 @@ class SendinblueClient:
         except ApiException as e:
             print("Exception when calling TransactionalEmailsApi->send_transac_email: %s\n" % e)
 
-    def send_password_changed_email(self, email: str, first_name: str) -> None:
+    def send_password_changed_email(self, email: str, full_name: str) -> None:
         """
         Sends a password changed email to a user.
         :param email: The email of the user.
-        :param first_name: The first name of the user.
+        :param full_name: The full name of the user.
         :return: None
         """
         # We update the contact
@@ -207,7 +205,7 @@ class SendinblueClient:
             to=[{"email": email}],
             template_id=email_templates['Password Changed Email'],
             params={
-                'NOMBRE': first_name
+                'FULL_NAME': full_name
             }
         )
         try:
