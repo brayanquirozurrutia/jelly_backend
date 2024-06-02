@@ -30,6 +30,7 @@ urlpatterns = [
     path(API_VERSION_1, include('jwt_app.urls')),
     path(API_VERSION_1, include('users.urls')),
     path(API_VERSION_1, include('users_tokens.urls')),
+    path(API_VERSION_1, include('products.urls')),
     # Debug
     path("__debug__/", include(debug_toolbar.urls)),
     # Swagger

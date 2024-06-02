@@ -1,5 +1,6 @@
 OUATH_TAG = ['OAuth']
+JWT_TAG = ['JWT']
 USER_TAG = ['User']
 ACCOUNT_ACTIVATION_TOKEN_TAG = ['Account Activation Token']
 PASSWORD_RESET_TOKEN_TAG = ['Password Reset Token']
-JWT_TAG = ['JWT']
+PRODUCTS_TAG = ['Products']
