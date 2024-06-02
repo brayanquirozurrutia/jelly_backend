@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'jwt_app',
     'users',
     'users_tokens',
+    'products',
 ]
 
 MIDDLEWARE = [
