@@ -1,5 +1,4 @@
 import os
-
 from dotenv import load_dotenv
 from jelly_backend.settings import *
 
@@ -7,7 +6,7 @@ load_dotenv()
 
 DEBUG = True
 
-allowed_hosts = [
+ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1'
 ]
@@ -22,4 +21,3 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
