@@ -22,6 +22,7 @@ class Query(graphene.ObjectType):
     list_products = graphene.List(ProductType)
     list_groups = graphene.List(GroupType)
     list_categories = graphene.List(CategoryType)
+    get_product = graphene.Field(ProductType, id=graphene.ID(required=True))
 
     def resolve_list_products(self, info):
         return Product.objects.all()
@@ -31,3 +32,9 @@ class Query(graphene.ObjectType):
 
     def resolve_list_categories(self, info):
         return Category.objects.all()
+
+    def resolve_get_product(self, info, id):
+        try:
+            return Product.objects.get(pk=id)
+        except Product.DoesNotExist:
+            return None
