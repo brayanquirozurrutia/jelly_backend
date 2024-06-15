@@ -25,9 +25,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'oauth2_provider',
+    'graphene_django',
     # Custom apps
     'oauth_app',
-    'jwt_app',
+    'authentication',
     'users',
     'users_tokens',
     'products',
@@ -38,12 +39,12 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'jelly_backend.urls'
@@ -109,15 +110,10 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://localhost:8081'
-]
-
 AUTH_USER_MODEL = 'users.User'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
@@ -125,7 +121,6 @@ GRAPHENE = {
     "SCHEMA": "jelly_backend.schema.schema"
 }
 
-# Load environment-specific settings
 if ENVIRONMENT == 'production':
     from .settings_prod import *
 else:
