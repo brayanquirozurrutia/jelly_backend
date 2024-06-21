@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 from jelly_backend.utils.utils import valida_rut
 from users.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -147,14 +148,10 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return attrs
 
     def save(self, **kwargs):
-        # We obtain the user
         user = self.instance
-        # We generate the tokens
         refresh = RefreshToken.for_user(user)
-        # We update the last login
         user.last_login = datetime.now()
         user.save()
-        # We return the data
         self.instance = user
         return {
             'id': user.id,

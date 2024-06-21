@@ -26,17 +26,15 @@ schema_view = get_schema_view(
     permission_classes=[AllowAny],
 )
 
-API_VERSION_1 = "jelly/v1/"
-
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     # API
-    path(API_VERSION_1, include('oauth_app.urls')),
-    path(API_VERSION_1, include('authentication.urls')),
-    path(API_VERSION_1, include('users.urls')),
-    path(API_VERSION_1, include('users_tokens.urls')),
-    path(API_VERSION_1, include('products.urls')),
+    path('oauth/', include('oauth_app.urls'), name='oauth'),
+    path('authentication/', include('authentication.urls'), name='authentication'),
+    path('users/', include('users.urls'), name='users'),
+    path('users-tokens/', include('users_tokens.urls'), name='users_tokens'),
+    path('products/', include('products.urls'), name='products'),
     # Debug
     path("__debug__/", include(debug_toolbar.urls)),
     # Swagger
