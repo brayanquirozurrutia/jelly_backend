@@ -4,8 +4,8 @@ from users.views import (
 )
 
 urlpatterns = [
-    path('users/create_user/', UserCreateAPIView.as_view(), name='create_user'),
-    path('users/login/', UserLoginAPIView.as_view(), name='login'),
+    path('create/', UserCreateAPIView.as_view(), name='create_user'),
+    path('login/', UserLoginAPIView.as_view(), name='login'),
     # PARA TESTEAR COSAS
-    path('users/list_users/', ListUsersAPIView.as_view({'get': 'list'}), name='list_users'),
+    path('list-users/', ListUsersAPIView.as_view({'get': 'list'}), name='list_users'),
 ]
