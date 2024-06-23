@@ -11,6 +11,15 @@ from jelly_backend.docs.swagger_tags import USER_TAG
 from users.models import User
 
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.middleware import csrf
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 class UserCreateAPIView(APIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -90,8 +99,41 @@ class UserLoginAPIView(APIView):
         """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.save()
-        return Response(data, status=status.HTTP_200_OK)
+        user = serializer.save()
+
+        refresh = RefreshToken.for_user(user)
+
+        response = Response({
+            'id': user.id,
+        }, status=status.HTTP_200_OK)
+
+        django_env = os.environ.get('DJANGO_ENV', 'development')
+
+        httponly = True
+        secure = True
+
+        if django_env == 'development':
+            httponly = False
+            secure = False
+
+        response.set_cookie(
+            key='access_token',
+            value=str(refresh.access_token),
+            httponly=httponly,
+            secure=secure,
+            samesite='Lax'
+        )
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=httponly,
+            secure=secure,
+            samesite='Lax'
+        )
+
+        csrf.get_token(request)
+
+        return response
 
 
 # PARA TESTEAR COSAS
@@ -119,4 +161,5 @@ class ListUsersAPIView(viewsets.ViewSet):
         """
         queryset = User.objects.all()
         serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)

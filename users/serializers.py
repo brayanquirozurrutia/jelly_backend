@@ -3,8 +3,6 @@ from rest_framework import serializers
 from dateutil.relativedelta import relativedelta
 from jelly_backend.utils.utils import valida_rut
 from users.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -111,8 +109,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     email = serializers.EmailField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
-    access_token = serializers.CharField(read_only=True)
-    refresh_token = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -120,8 +116,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'password',
-            'access_token',
-            'refresh_token',
         ]
 
     @staticmethod
@@ -149,12 +143,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         user = self.instance
-        refresh = RefreshToken.for_user(user)
         user.last_login = datetime.now()
         user.save()
         self.instance = user
-        return {
-            'id': user.id,
-            'access_token': str(refresh.access_token),
-            'refresh_token': str(refresh),
-        }
+        return user

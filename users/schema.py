@@ -1,5 +1,4 @@
 import graphene
-import uuid
 from graphene_django.types import DjangoObjectType
 from users.models import User
 
