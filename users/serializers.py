@@ -70,26 +70,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     # We validate the data
     def validate(self, attrs):
-        # We verify that the email is unique
         email = attrs['email']
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError("El email ya está en uso.")
         rut = attrs['rut']
-        # We verify that the RUT is valid
         if not valida_rut(rut):
             raise serializers.ValidationError("El RUT no es válido.")
-        # We verify that the RUT is unique
         if User.objects.filter(rut=rut).exists():
             raise serializers.ValidationError("El RUT ya está en uso.")
-        # We verify that the passwords match
         if attrs['password'] != attrs['password_2']:
             raise serializers.ValidationError("Las contraseñas no coinciden.")
-        # We verify that the user is of legal age
         birth_date = attrs['birth_date']
         age = relativedelta(datetime.now(), birth_date).years
-        if age < 15:
-            raise serializers.ValidationError("Debes ser mayor de edad para registrarte.")
-        # We verify that the age is not greater than 100
+        if age < 10:
+            raise serializers.ValidationError("Debes ser mayor de 10 años para registrarte.")
         if age > 100:
             raise serializers.ValidationError("Debes ingresar una edad válida.")
         return attrs
