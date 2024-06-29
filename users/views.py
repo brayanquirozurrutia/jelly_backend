@@ -46,7 +46,10 @@ class UserCreateAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # TODO: All the logic to send the email will be with Celery
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # TODO: All the logic to send the email will be with Celery and onesignal
         # We obtain the activation token
         account_activation_token_obj = serializer.instance.account_activation_token
         account_activation_token = account_activation_token_obj.code

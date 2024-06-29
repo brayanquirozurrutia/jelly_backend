@@ -30,7 +30,6 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     # API
-    path('oauth/', include('oauth_app.urls'), name='oauth'),
     path('authentication/', include('authentication.urls'), name='authentication'),
     path('users/', include('users.urls'), name='users'),
     path('users-tokens/', include('users_tokens.urls'), name='users_tokens'),
@@ -41,8 +40,6 @@ urlpatterns = [
     re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    # OAuth2
-    re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # GraphQL
     path('graphql', ensure_csrf_cookie(GraphQLView.as_view(graphiql=True))),
 ]

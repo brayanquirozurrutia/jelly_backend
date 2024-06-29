@@ -24,10 +24,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework_simplejwt',
     'corsheaders',
-    'oauth2_provider',
     'graphene_django',
     # Custom apps
-    'oauth_app',
     'authentication',
     'users',
     'users_tokens',
@@ -85,15 +83,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'EXCEPTION_HANDLER': 'jelly_backend.exceptions.custom_exception_handler',
 }
 
-AUTHENTICATION_BACKENDS = (
-    'oauth2_provider.backends.OAuth2Backend',
-)
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
