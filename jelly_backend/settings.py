@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'graphene_django',
+    'celery',
     # Custom apps
     'authentication',
     'users',
@@ -114,6 +115,14 @@ SIMPLE_JWT = {
 GRAPHENE = {
     "SCHEMA": "jelly_backend.schema.schema"
 }
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://localhost')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'rpc://')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
 
 if ENVIRONMENT == 'production':
     from .settings_prod import *

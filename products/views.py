@@ -8,12 +8,13 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from products.serializers import GroupSerializer, CategorySerializer, ProductSerializer
 from jelly_backend.docs.swagger_tags import PRODUCTS_TAG
+from jelly_backend.permissions import IsAdminUserLoggedIn
 
 load_dotenv()
 
 
 class GroupCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserLoggedIn]
 
     @swagger_auto_schema(
         operation_description="""

@@ -64,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = models.DateField(blank=True, null=True)
     user_status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R', blank=False, null=False)
     nickname = models.CharField(max_length=30, blank=True, null=True)
+    user_admin = models.BooleanField(default=False, null=True, blank=True)
 
     objects = CustomUserManager()
 

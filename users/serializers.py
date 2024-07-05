@@ -103,6 +103,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     email = serializers.EmailField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
+    user_admin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -110,6 +111,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'password',
+            'user_admin',
         ]
 
     @staticmethod
