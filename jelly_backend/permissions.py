@@ -13,3 +13,14 @@ class IsActiveUser(BasePermission):
 
         # Verifica si el usuario tiene el estado 'Active'
         return request.user.user_status == 'A'
+
+
+class IsAdminUserLoggedIn(BasePermission):
+    """
+    Permission class to allow access only to admin users who are logged in.
+    """
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return request.user.user_admin
+        return False

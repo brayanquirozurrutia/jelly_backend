@@ -1,4 +1,3 @@
-OUATH_TAG = ['OAuth']
 JWT_TAG = ['JWT']
 USER_TAG = ['User']
 ACCOUNT_ACTIVATION_TOKEN_TAG = ['Account Activation Token']

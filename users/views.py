@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,10 @@ from django.middleware import csrf
 
 import os
 from dotenv import load_dotenv
+
+from jelly_backend.one_signal.notification_service import send_email_via_onesignal
+from jelly_backend.docs.onesignal import templates_ids
+from users.tasks import send_one_signal_email
 
 load_dotenv()
 
@@ -43,36 +48,22 @@ class UserCreateAPIView(APIView):
         """
         Create a new user.
         """
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        with transaction.atomic():
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            account_activation_token_obj = serializer.instance.account_activation_token
+            account_activation_token = account_activation_token_obj.code
+            user_email = serializer.validated_data['email']
+            user_full_name = serializer.instance.get_full_name()
+            send_one_signal_email.delay(
+                email=user_email,
+                template_id=templates_ids['EMAIL']['ACTIVATE_ACCOUNT'],
+                full_name=user_full_name,
+                activate_account_code=account_activation_token
+            )
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # TODO: All the logic to send the email will be with Celery and onesignal
-        # We obtain the activation token
-        account_activation_token_obj = serializer.instance.account_activation_token
-        account_activation_token = account_activation_token_obj.code
-        # We send the activation email
-        sendinblue_client = SendinblueClient()
-        # First we create the contact in Sendinblue
-        user_obj = serializer.instance
-        sendinblue_client.create_contact(
-            email=serializer.validated_data['email'],
-            full_name=user_obj.get_full_name(),
-            first_name=user_obj.first_name,
-            last_name=user_obj.last_name
-        )
-        # Second we add the contact to the list
-        sendinblue_client.add_contact_to_list(
-            email_to_add=serializer.validated_data['email'],
-        )
-        sendinblue_client.activate_account_email(
-            email=serializer.validated_data['email'],
-            full_name=user_obj.get_full_name(),
-            activation_code=account_activation_token
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserLoginAPIView(APIView):
@@ -108,6 +99,7 @@ class UserLoginAPIView(APIView):
 
         response = Response({
             'id': user.id,
+            'user_admin': user.user_admin,
         }, status=status.HTTP_200_OK)
 
         django_env = os.environ.get('DJANGO_ENV', 'development')

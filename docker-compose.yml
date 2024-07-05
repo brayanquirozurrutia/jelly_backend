@@ -13,6 +13,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
     depends_on:
       - db
+      - rabbitmq
     env_file:
       - .env
     networks:
@@ -26,6 +27,34 @@ services:
       POSTGRES_DB: ${NAME_DEV}
       POSTGRES_USER: ${USER_DEV}
       POSTGRES_PASSWORD: ${PASSWORD_DEV}
+    networks:
+      - jelly_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - jelly_network
+
+  celery:
+    build: .
+    command: celery -A jelly_backend worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      DJANGO_ENV: development
+      SECRET_KEY: ${SECRET_KEY}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+    env_file:
+      - .env
     networks:
       - jelly_network
 

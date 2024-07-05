@@ -53,3 +53,6 @@ CSRF_COOKIE_DOMAIN = '.mi-dominio.com'
 CSRF_TRUSTED_ORIGINS = [
     'https://mi-dominio.com',
 ]
+
+CELERY_BROKER_URL = 'amqp://rabbitmq:5672'
+CELERY_RESULT_BACKEND = 'rpc://'
