@@ -7,7 +7,6 @@ from drf_yasg.utils import swagger_auto_schema
 from users.serializers import (
     UserSerializer, UserLoginSerializer
 )
-from jelly_backend.utils.email_utils import SendinblueClient
 from jelly_backend.docs.swagger_tags import USER_TAG
 from users.models import User
 
@@ -18,9 +17,7 @@ from django.middleware import csrf
 import os
 from dotenv import load_dotenv
 
-from jelly_backend.one_signal.notification_service import send_email_via_onesignal
-from jelly_backend.docs.onesignal import templates_ids
-from users.tasks import send_one_signal_email
+from users.tasks import send_activate_account_email
 
 load_dotenv()
 
@@ -56,9 +53,8 @@ class UserCreateAPIView(APIView):
             account_activation_token = account_activation_token_obj.code
             user_email = serializer.validated_data['email']
             user_full_name = serializer.instance.get_full_name()
-            send_one_signal_email.delay(
+            send_activate_account_email.delay(
                 email=user_email,
-                template_id=templates_ids['EMAIL']['ACTIVATE_ACCOUNT'],
                 full_name=user_full_name,
                 activate_account_code=account_activation_token
             )

@@ -28,8 +28,8 @@ class Product(models.Model):
     price = models.IntegerField()
     stock = models.IntegerField()
     image = models.URLField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    group = models.ForeignKey(Group, on_delete=models.PROTECT)
 
     class Meta:
         db_table = "product"

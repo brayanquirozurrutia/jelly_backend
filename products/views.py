@@ -1,3 +1,4 @@
+
 from dotenv import load_dotenv
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -6,15 +7,25 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from products.serializers import GroupSerializer, CategorySerializer, ProductSerializer
+from products.serializers import (
+    CreateGroupSerializer,
+    UpdateGroupSerializer,
+    DeleteGroupSerializer,
+    CreateCategorySerializer,
+    UpdateCategorySerializer,
+    ProductSerializer,
+    DeleteCategorySerializer
+)
 from jelly_backend.docs.swagger_tags import PRODUCTS_TAG
 from jelly_backend.permissions import IsAdminUserLoggedIn
+from products.models import Group, Category
 
 load_dotenv()
 
 
-class GroupCreateView(APIView):
+class CreateGroupView(APIView):
     permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = CreateGroupSerializer
 
     @swagger_auto_schema(
         operation_description="""
@@ -26,47 +37,160 @@ class GroupCreateView(APIView):
         """,
         operation_id="products_create_group",
         operation_summary="Create Group",
-        request_body=GroupSerializer,
+        request_body=CreateGroupSerializer,
         responses={
-            201: GroupSerializer,
+            201: CreateGroupSerializer,
             400: 'Bad Request',
         },
         tags=[PRODUCTS_TAG]
     )
     def post(self, request):
-        serializer = GroupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class CategoryCreateView(APIView):
-    permission_classes = [AllowAny]
+class CreateCategoryView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = CreateCategorySerializer
 
     @swagger_auto_schema(
         operation_description="""
         ## Create Category
-        
+
         About the endpoint:
-        
+
         - This endpoint creates a new category in the system.
         """,
-        operation_summary="Create Category",
         operation_id="products_create_category",
-        request_body=CategorySerializer,
+        operation_summary="Create Category",
+        request_body=CreateCategorySerializer,
         responses={
-            201: CategorySerializer,
+            201: CreateCategorySerializer,
             400: 'Bad Request',
         },
         tags=[PRODUCTS_TAG]
     )
     def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class EditGroupView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = UpdateGroupSerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Edit Group
+
+        About the endpoint:
+
+        - This endpoint edits an existing group in the system.
+        """,
+        operation_id="products_edit_group",
+        operation_summary="Edit Group",
+        request_body=UpdateGroupSerializer,
+        responses={
+            200: UpdateGroupSerializer,
+            400: 'Bad Request',
+            404: 'Group not found',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def patch(self, request, group_id):
+        group_obj = Group.objects.filter(id=group_id).first()
+        serializer = self.serializer_class(data=request.data, instance=group_obj, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(serializer.instance, serializer.validated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EditCategoryView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = UpdateCategorySerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Edit Category
+
+        About the endpoint:
+
+        - This endpoint edits an existing category in the system.
+        """,
+        operation_id="products_edit_category",
+        operation_summary="Edit Category",
+        request_body=UpdateCategorySerializer,
+        responses={
+            200: UpdateCategorySerializer,
+            400: 'Bad Request',
+            404: 'Category not found',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def patch(self, request, category_id):
+        category_obj = Category.objects.filter(id=category_id).first()
+        serializer = self.serializer_class(data=request.data, instance=category_obj, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(serializer.instance, serializer.validated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DeleteGroupView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = DeleteGroupSerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Delete Group
+        
+        About the endpoint:
+        
+        - This endpoint deletes an existing group in the system.
+        """,
+        operation_id="products_delete_group",
+        operation_summary="Delete Group",
+        responses={
+            200: 'Group deleted successfully.',
+            400: 'Bad Request',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def delete(self, request, group_id):
+        serializer = self.serializer_class(data={'group_id': group_id})
+        serializer.is_valid(raise_exception=True)
+        serializer.delete()
+        return Response('Group deleted successfully.', status=status.HTTP_200_OK)
+
+
+class DeleteCategoryView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = DeleteCategorySerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Delete Category
+
+        About the endpoint:
+
+        - This endpoint deletes an existing category in the system.
+        """,
+        operation_id="products_delete_category",
+        operation_summary="Delete Category",
+        responses={
+            200: 'Category deleted successfully.',
+            400: 'Bad Request',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def delete(self, request, category_id):
+        serializer = self.serializer_class(data={'category_id': category_id})
+        serializer.is_valid(raise_exception=True)
+        serializer.delete()
+        return Response('Category deleted successfully.', status=status.HTTP_200_OK)
 
 
 class ProductCreateView(APIView):

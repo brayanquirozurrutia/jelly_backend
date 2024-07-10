@@ -12,14 +12,14 @@ from users.models import User
 from jelly_backend.docs.swagger_tags import (
     ACCOUNT_ACTIVATION_TOKEN_TAG, PASSWORD_RESET_TOKEN_TAG
 )
+from users_tokens.taks import (
+    send_account_activated_email, send_welcome_email, send_new_account_activation_token_email
+)
 
 
 class AccountActivationTokenActivateAccountAPIView(APIView):
     serializer_class = AccountActivationTokenActivateAccountSerializer
     permission_classes = [AllowAny]
-
-    def get_serializer_context(self):
-        return {'request': self.request}
 
     @swagger_auto_schema(
         operation_description="""
@@ -43,19 +43,23 @@ class AccountActivationTokenActivateAccountAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # We send the activation email and the welcome email
-        sendinblue_client = SendinblueClient()
-        # We get the user
         user_obj = User.objects.get(email=serializer.validated_data['email'])
-        sendinblue_client.send_account_activated_email(
-            email=serializer.validated_data['email'],
-            full_name=user_obj.get_full_name()
+        user_email = serializer.validated_data['email']
+        user_full_name = user_obj.get_full_name()
+        send_account_activated_email.delay(
+            email=user_email,
+            full_name=user_full_name
         )
-        sendinblue_client.send_welcome_email(
-            email=serializer.validated_data['email'],
-            full_name=user_obj.get_full_name()
+        send_welcome_email.delay(
+            email=user_email,
+            full_name=user_full_name
         )
-        return Response("The account has been activated.", status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": "La cuenta ha sido activada.",
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class AccountActivationTokenNewTokenAPIView(APIView):
@@ -86,22 +90,27 @@ class AccountActivationTokenNewTokenAPIView(APIView):
         serializer.save()
         account_activation_token_obj = serializer.instance
         if account_activation_token_obj:
-            # We send the email with the new token
-            sendinblue_client = SendinblueClient()
-            # We get the user
             user_obj = account_activation_token_obj.user
-            first_name = user_obj.first_name
-            sendinblue_client.activate_account_email(
-                email=serializer.validated_data['email'],
-                full_name=user_obj.get_full_name(),
-                activation_code=account_activation_token_obj.code
+            user_email = serializer.validated_data['email']
+            user_full_name = user_obj.get_full_name()
+            activation_code = account_activation_token_obj.code
+            send_new_account_activation_token_email.delay(
+                email=user_email,
+                full_name=user_full_name,
+                activate_account_code=activation_code
             )
             return Response(
-                "El token será enviado solamente si el correo es válido y la cuenta aún no ha sido activada",
+                {
+                    "message": "El token será enviado solamente si el correo es válido y la cuenta aún no ha sido "
+                               "activada",
+                },
                 status=status.HTTP_200_OK
             )
         return Response(
-            "El token será enviado solamente si el correo es válido y la cuenta aún no ha sido activada",
+            {
+                "message": "El token será enviado solamente si el correo es válido y la cuenta aún no ha sido "
+                           "activada",
+            },
             status=status.HTTP_200_OK
         )
 

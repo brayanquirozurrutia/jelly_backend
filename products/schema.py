@@ -30,7 +30,13 @@ class Query(graphene.ObjectType):
         page=graphene.Int(),
         page_size=graphene.Int()
     )
-    list_categories = graphene.List(CategoryType)
+    total_categories = graphene.Int(search=graphene.String())
+    list_categories = graphene.List(
+        CategoryType,
+        search=graphene.String(),
+        page=graphene.Int(),
+        page_size=graphene.Int()
+    )
 
     def resolve_list_products(self, info):
         return Product.objects.all()
@@ -60,5 +66,21 @@ class Query(graphene.ObjectType):
 
         return list(groups)
 
-    def resolve_list_categories(self, info):
-        return Category.objects.all()
+    @validate_token
+    def resolve_total_categories(self, info, search=None):
+        categories = Category.objects.all()
+        if search:
+            categories = categories.filter(name__icontains=search)
+        return categories.count()
+
+    @validate_token
+    def resolve_list_categories(self, info, search=None, page=None, page_size=None):
+        categories = Category.objects.all()
+
+        if search:
+            categories = categories.filter(name__icontains=search)
+        if page is not None and page_size is not None:
+            offset = (page - 1) * page_size
+            categories = categories[offset:offset + page_size]
+
+        return list(categories)

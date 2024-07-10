@@ -40,6 +40,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
     'PATCH',
     'DELETE',
+    'OPTIONS',
 ]
 CORS_EXPOSE_HEADERS = [
     'Content-Type',

@@ -9,4 +9,8 @@ def custom_exception_handler(exc, context):
         error_message = next(iter(exc.detail.values()))[0] if exc.detail else None
         if error_message:
             return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+    if isinstance(exc, DRFValidationError) and isinstance(exc.detail, list):
+        error_message = exc.detail[0] if exc.detail else None
+        if error_message:
+            return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
     return exception_handler(exc, context)
