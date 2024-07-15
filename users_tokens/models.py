@@ -32,9 +32,7 @@ class AbstractToken(models.Model):
 
     @classmethod
     def create_new_token(cls, user: User) -> "AbstractToken":
-        # Delete the existing token if there is one associated with the user
         cls.objects.filter(user=user).delete()
-        # Create a new token for the given user
         new_token = cls.objects.create(user=user)
         return new_token
 

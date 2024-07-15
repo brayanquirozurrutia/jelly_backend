@@ -4,8 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from users_tokens.serializers import (
-    AccountActivationTokenActivateAccountSerializer, AccountActivationTokenNewTokenSerializer,
-    PasswordResetTokenNewTokenSerializer, PasswordResetTokenResetPasswordSerializer
+    AccountActivationTokenActivateAccountSerializer,
+    AccountActivationTokenNewTokenSerializer,
+    PasswordResetTokenNewTokenSerializer,
+    PasswordResetTokenResetPasswordSerializer,
 )
 from jelly_backend.utils.email_utils import SendinblueClient
 from users.models import User
@@ -13,7 +15,11 @@ from jelly_backend.docs.swagger_tags import (
     ACCOUNT_ACTIVATION_TOKEN_TAG, PASSWORD_RESET_TOKEN_TAG
 )
 from users_tokens.taks import (
-    send_account_activated_email, send_welcome_email, send_new_account_activation_token_email
+    send_account_activated_email,
+    send_welcome_email,
+    send_new_account_activation_token_email,
+    send_forgot_password_email,
+    send_password_changed_email,
 )
 
 
@@ -138,27 +144,31 @@ class PasswordResetTokenNewTokenAPIView(APIView):
         responses={200: "The new token has been sent."},
     )
     def post(self, request, *args, **kwargs):
+        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         password_reset_token_obj = serializer.instance
         if password_reset_token_obj:
-            # We send the email with the new token
-            sendinblue_client = SendinblueClient()
-            # We get the user
             user_obj = password_reset_token_obj.user
-            first_name = user_obj.first_name
-            sendinblue_client.send_forgot_password_email(
-                email=serializer.validated_data['email'],
-                full_name=user_obj.get_full_name(),
-                reset_code=password_reset_token_obj.code
+            user_email = serializer.validated_data['email']
+            user_full_name = user_obj.get_full_name()
+            reset_code = password_reset_token_obj.code
+            send_forgot_password_email.delay(
+                email=user_email,
+                full_name=user_full_name,
+                reset_password_code=reset_code
             )
             return Response(
-                "El token será enviado solamente si el correo es válido",
+                {
+                    "message": "El token será enviado solamente si el correo es válido",
+                },
                 status=status.HTTP_200_OK
             )
         return Response(
-            "El token será enviado solamente si el correo es válido",
+            {
+                "message": "El token será enviado solamente si el correo es válido",
+            },
             status=status.HTTP_200_OK
         )
 
@@ -187,12 +197,17 @@ class PasswordResetTokenPasswordChangedAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # We send the password changed email
-        sendinblue_client = SendinblueClient()
-        # We get the user
         user_obj = User.objects.get(email=serializer.validated_data['email'])
-        sendinblue_client.send_password_changed_email(
-            email=serializer.validated_data['email'],
-            full_name=user_obj.get_full_name()
+        user_email = serializer.validated_data['email']
+        user_full_name = user_obj.get_full_name()
+        send_password_changed_email.delay(
+            email=user_email,
+            full_name=user_full_name
         )
-        return Response("La contraseña ha sido reestablecida.", status=status.HTTP_200_OK)
+
+        return Response(
+            {
+                "message": "La contraseña ha sido reestablecida.",
+            },
+            status=status.HTTP_200_OK
+        )

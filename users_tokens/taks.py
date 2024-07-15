@@ -39,3 +39,29 @@ def send_new_account_activation_token_email(
         full_name=full_name,
         activate_account_code=activate_account_code,
     )
+
+
+@shared_task(name='send_forgot_password_email')
+def send_forgot_password_email(
+        email: str,
+        full_name: str,
+        reset_password_code: str,
+):
+    send_email_via_onesignal(
+        email=email,
+        template_id=templates_ids['EMAIL']['FORGOT_PASSWORD'],
+        full_name=full_name,
+        reset_password_code=reset_password_code,
+    )
+
+
+@shared_task(name='send_password_changed_email')
+def send_password_changed_email(
+        email: str,
+        full_name: str,
+):
+    send_email_via_onesignal(
+        email=email,
+        template_id=templates_ids['EMAIL']['PASSWORD_CHANGED'],
+        full_name=full_name,
+    )

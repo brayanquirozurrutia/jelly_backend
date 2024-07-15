@@ -31,7 +31,7 @@ class BaseCreateSerializer(serializers.ModelSerializer):
 
 
 class CreateGroupSerializer(BaseCreateSerializer):
-    name_error = "Ya hay un grupo con este nombre."
+    name_error = "Ya hay un grupo con este nombre"
 
     class Meta:
         model = Group
@@ -43,7 +43,7 @@ class CreateGroupSerializer(BaseCreateSerializer):
 
 
 class CreateCategorySerializer(BaseCreateSerializer):
-    name_error = "Ya hay una categoría con este nombre."
+    name_error = "Ya hay una categoría con este nombre"
 
     class Meta:
         model = Category
@@ -80,7 +80,7 @@ class BaseUpdateSerializer(serializers.ModelSerializer):
 
 class UpdateGroupSerializer(BaseUpdateSerializer):
     object_error = "Grupo no encontrado"
-    name_error = "Ya hay un grupo con este nombre."
+    name_error = "Ya hay un grupo con este nombre"
 
     class Meta:
         model = Group
@@ -93,7 +93,7 @@ class UpdateGroupSerializer(BaseUpdateSerializer):
 
 class UpdateCategorySerializer(BaseUpdateSerializer):
     object_error = "Categoría no encontrada"
-    name_error = "Ya hay una categoría con este nombre."
+    name_error = "Ya hay una categoría con este nombre"
 
     class Meta:
         model = Category

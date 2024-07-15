@@ -8,6 +8,7 @@ from users.serializers import (
     UserSerializer, UserLoginSerializer
 )
 from jelly_backend.docs.swagger_tags import USER_TAG
+from jelly_backend import settings
 from users.models import User
 
 
@@ -107,19 +108,24 @@ class UserLoginAPIView(APIView):
             httponly = False
             secure = False
 
+        access_token_lifetime = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+        refresh_token_lifetime = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
+
         response.set_cookie(
             key='access_token',
             value=str(refresh.access_token),
             httponly=httponly,
             secure=secure,
-            samesite='Lax'
+            samesite='Lax',
+            max_age=access_token_lifetime
         )
         response.set_cookie(
             key='refresh_token',
             value=str(refresh),
             httponly=httponly,
             secure=secure,
-            samesite='Lax'
+            samesite='Lax',
+            max_age=refresh_token_lifetime
         )
 
         csrf.get_token(request)

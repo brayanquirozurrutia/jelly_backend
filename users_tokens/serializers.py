@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import transaction, DatabaseError
 from rest_framework import serializers
 from users_tokens.models import AccountActivationToken, PasswordResetToken
 from users.models import User
@@ -27,21 +27,17 @@ class AccountActivationTokenActivateAccountSerializer(serializers.ModelSerialize
     def validate_account_activation_token(account_activation_token):
         return account_activation_token.strip()
 
-    # We validate the token
     def validate(self, attrs):
         account_activation_token = attrs['account_activation_token']
         email = attrs['email']
-        # We verify that the token is valid and that it is associated with the email
         account_activation_token_obj = AccountActivationToken.objects.filter(
             code=account_activation_token,
             user__email=email
         ).first()
         if not account_activation_token_obj:
-            raise serializers.ValidationError("El token no es válido.")
-        # We verify that the token has not expired
+            raise serializers.ValidationError("El token no es válido")
         if account_activation_token_obj.is_expired:
             raise serializers.ValidationError("El token ha expirado.")
-        # We verify that the user is not already active
         if account_activation_token_obj.user.user_status != 'R':
             raise serializers.ValidationError("La cuenta ya ha sido activada.")
         return attrs
@@ -114,7 +110,6 @@ class PasswordResetTokenNewTokenSerializer(serializers.ModelSerializer):
             'email',
         ]
 
-    # We clean the data before
     @staticmethod
     def validate_email(email):
         return email.lower().strip()
@@ -123,13 +118,15 @@ class PasswordResetTokenNewTokenSerializer(serializers.ModelSerializer):
         email = self.validated_data['email']
         user_obj = User.objects.filter(email=email).first()
         if user_obj:
-            with transaction.atomic():
-                # We create a new token
+            try:
                 password_reset_token_obj = PasswordResetToken.create_new_token(
                     user=user_obj
                 )
                 self.instance = password_reset_token_obj
                 return password_reset_token_obj
+            except DatabaseError:
+                self.instance = None
+                return
         self.instance = None
         return None
 
@@ -179,7 +176,7 @@ class PasswordResetTokenResetPasswordSerializer(serializers.ModelSerializer):
             user__email=email
         ).first()
         if not password_reset_token_obj:
-            raise serializers.ValidationError("El token no es válido.")
+            raise serializers.ValidationError("El token no es válido")
         # We verify that the token has not expired
         if password_reset_token_obj.is_expired:
             raise serializers.ValidationError("El token ha expirado.")
