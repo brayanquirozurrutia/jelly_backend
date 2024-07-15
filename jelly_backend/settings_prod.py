@@ -9,7 +9,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'tecitostore.com',
-    'jelly-backend.onrender.com',
 ]
 
 DATABASES = {

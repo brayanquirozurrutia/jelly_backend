@@ -11,22 +11,11 @@ services:
     environment:
       DJANGO_ENV: development
       SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
-      - db
       - rabbitmq
     env_file:
       - .env
-    networks:
-      - jelly_network
-
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: ${NAME_DEV}
-      POSTGRES_USER: ${USER_DEV}
-      POSTGRES_PASSWORD: ${PASSWORD_DEV}
     networks:
       - jelly_network
 
@@ -47,7 +36,6 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
       - rabbitmq
     environment:
       DJANGO_ENV: development
@@ -57,9 +45,6 @@ services:
       - .env
     networks:
       - jelly_network
-
-volumes:
-  postgres_data:
 
 networks:
   jelly_network:
