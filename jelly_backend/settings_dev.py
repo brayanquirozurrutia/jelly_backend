@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import dj_database_url
 from jelly_backend.settings import *
 
 load_dotenv()
@@ -12,14 +13,7 @@ ALLOWED_HOSTS = [
 ]
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('NAME_DEV'),
-        'USER': os.getenv('USER_DEV'),
-        'PASSWORD': os.getenv('PASSWORD_DEV'),
-        'HOST': os.getenv('HOST_DEV'),
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 CORS_ALLOW_CREDENTIALS = True
