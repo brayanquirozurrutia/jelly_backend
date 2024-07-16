@@ -51,6 +51,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./staticfiles:/usr/share/nginx/html/static
+      - /etc/letsencrypt/live:/etc/letsencrypt/live
     ports:
       - "80:80"
       - "443:443"
