@@ -9,6 +9,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'tecitostore.com',
+    'api.tecitostore.com',
+    '179.43.127.60',
 ]
 
 DATABASES = {
@@ -18,6 +20,7 @@ DATABASES = {
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'https://tecitostore.com',
+    'https://api.tecitostore.com',
 ]
 CORS_ALLOW_HEADERS = [
     'content-type',
@@ -46,6 +49,7 @@ CSRF_COOKIE_PATH = '/'
 CSRF_COOKIE_DOMAIN = '.tecitostore.com'
 CSRF_TRUSTED_ORIGINS = [
     'https://tecitostore.com',
+    'https://api.tecitostore.com',
 ]
 
 CELERY_BROKER_URL = 'amqp://rabbitmq:5672'

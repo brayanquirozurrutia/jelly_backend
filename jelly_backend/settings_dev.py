@@ -10,6 +10,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    'tecitostore.com',
+    'api.tecitostore.com',
+    '179.43.127.60',
 ]
 
 DATABASES = {
@@ -21,6 +24,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://localhost:8081',
     'http://localhost:8000',
+    'https://tecitostore.com',
+    'https://api.tecitostore.com',
 ]
 CORS_ALLOW_HEADERS = [
     'content-type',
@@ -51,6 +56,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'https://localhost:8081',
     'http://localhost:8000',
+    'https://tecitostore.com',
+    'https://api.tecitostore.com',
 ]
 
 CELERY_BROKER_URL = 'amqp://rabbitmq:5672'
