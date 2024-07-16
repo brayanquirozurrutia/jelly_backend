@@ -46,5 +46,18 @@ services:
     networks:
       - jelly_network
 
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./staticfiles:/usr/share/nginx/html/static
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    networks:
+      - jelly_network
+
 networks:
   jelly_network:
