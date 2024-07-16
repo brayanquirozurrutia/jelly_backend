@@ -11,6 +11,8 @@ from graphene_django.views import GraphQLView
 
 from rest_framework.permissions import AllowAny
 
+from jelly_backend import settings
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -34,12 +36,21 @@ urlpatterns = [
     path('users/', include('users.urls'), name='users'),
     path('users-tokens/', include('users_tokens.urls'), name='users_tokens'),
     path('products/', include('products.urls'), name='products'),
-    # Debug
-    path("__debug__/", include(debug_toolbar.urls)),
-    # Swagger
-    re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
-    re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    # GraphQL
-    path('graphql', ensure_csrf_cookie(GraphQLView.as_view(graphiql=True))),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        # Debug
+        path("__debug__/", include(debug_toolbar.urls)),
+        # Swagger
+        re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+        re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+        path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+        # GraphQL
+        path('graphql', ensure_csrf_cookie(GraphQLView.as_view(graphiql=True))),
+    ]
+
+else:
+    urlpatterns += [
+        path('graphql', GraphQLView.as_view(graphiql=False)),
+    ]

@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
-ENVIRONMENT = os.environ.get('DJANGO_ENV', 'production')
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'development')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
