@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DJANGO_ENV: development
+      DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
