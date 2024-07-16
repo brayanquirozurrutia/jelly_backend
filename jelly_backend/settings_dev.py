@@ -16,7 +16,7 @@ ALLOWED_HOSTS = [
 ]
 
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL_DEV'))
 }
 
 CORS_ALLOW_CREDENTIALS = True
