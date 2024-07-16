@@ -8,4 +8,10 @@ app = Celery('jelly_backend')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.update(
+    worker_concurrency=2,
+    worker_prefetch_multiplier=1,
+    task_soft_time_limit=300,
+)
+
 app.autodiscover_tasks()

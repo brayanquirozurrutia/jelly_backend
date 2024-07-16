@@ -61,4 +61,3 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CELERY_BROKER_URL = 'amqp://rabbitmq:5672'
-CELERY_RESULT_BACKEND = 'rpc://'

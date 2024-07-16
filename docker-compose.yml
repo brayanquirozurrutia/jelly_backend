@@ -52,6 +52,7 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - ./staticfiles:/usr/share/nginx/html/static
       - /etc/letsencrypt:/etc/letsencrypt
+      - /root/.htpasswd:/etc/nginx/.htpasswd
     ports:
       - "80:80"
       - "443:443"
