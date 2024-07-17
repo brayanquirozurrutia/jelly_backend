@@ -38,7 +38,7 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      DJANGO_ENV: development
+      DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     env_file:
