@@ -48,7 +48,7 @@ services:
 
   frontend:
     build:
-      context: ./jelly_frontend
+      context: ../jelly_frontend
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
     ports:
