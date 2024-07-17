@@ -63,14 +63,6 @@ services:
     networks:
       - jelly_network
 
-  frontend:
-    build: ../jelly_frontend  # Cambia la ruta según sea necesario
-    ports:
-      - "3001:80"
-    networks:
-      - jelly_network
-    env_file:
-      - ../jelly_frontend/.env.production  # Cambia la ruta según sea necesario
-
 networks:
   jelly_network:
+    driver: bridge
