@@ -2,10 +2,10 @@ version: '3.9'
 
 services:
   web:
-    build: .
+    build: ./jelly_backend
     command: gunicorn --bind 0.0.0.0:8000 jelly_backend.wsgi:application
     volumes:
-      - .:/app
+      - ./jelly_backend:/app
     ports:
       - "8000:8000"
     environment:
@@ -15,7 +15,7 @@ services:
     depends_on:
       - rabbitmq
     env_file:
-      - .env
+      - ./jelly_backend/.env
     networks:
       - jelly_network
 
@@ -31,10 +31,10 @@ services:
       - jelly_network
 
   celery:
-    build: .
+    build: ./jelly_backend
     command: celery -A jelly_backend worker --loglevel=info
     volumes:
-      - .:/app
+      - ./jelly_backend:/app
     depends_on:
       - rabbitmq
     environment:
@@ -42,7 +42,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     env_file:
-      - .env
+      - ./jelly_backend/.env
     networks:
       - jelly_network
 
@@ -61,6 +61,15 @@ services:
       - web
     networks:
       - jelly_network
+
+  frontend:
+    build: ./jelly_frontend
+    ports:
+      - "3001:80"
+    networks:
+      - jelly_network
+    env_file:
+      - ./jelly_frontend/.env.production
 
 networks:
   jelly_network:
