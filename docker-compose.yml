@@ -50,7 +50,7 @@ services:
     build:
       context: ../jelly_frontend
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ../jelly_frontend:/app
     ports:
       - "3000:3000"
     networks:
