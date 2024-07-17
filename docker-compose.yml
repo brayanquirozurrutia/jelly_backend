@@ -64,6 +64,7 @@ services:
       - ./staticfiles:/usr/share/nginx/html/static
       - /etc/letsencrypt:/etc/letsencrypt
       - /root/.htpasswd:/etc/nginx/.htpasswd
+      - ../jelly_frontend/dist:/usr/share/nginx/html
     ports:
       - "80:80"
       - "443:443"
