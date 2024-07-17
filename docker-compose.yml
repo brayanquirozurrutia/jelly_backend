@@ -52,7 +52,7 @@ services:
     volumes:
       - ../jelly_frontend:/app
     ports:
-      - "3000:3000"
+      - "3000:80"
     networks:
       - jelly_network
 
