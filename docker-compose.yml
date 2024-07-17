@@ -15,7 +15,7 @@ services:
     depends_on:
       - rabbitmq
     env_file:
-      - ./jelly_backend/.env
+      - .env  # Asegúrate de que este archivo exista en la raíz del proyecto jelly_backend
     networks:
       - jelly_network
 
@@ -42,7 +42,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     env_file:
-      - ./jelly_backend/.env
+      - .env  # Asegúrate de que este archivo exista en la raíz del proyecto jelly_backend
     networks:
       - jelly_network
 
@@ -59,6 +59,7 @@ services:
       - "443:443"
     depends_on:
       - web
+      - frontend
     networks:
       - jelly_network
 
@@ -69,7 +70,7 @@ services:
     networks:
       - jelly_network
     env_file:
-      - ./jelly_frontend/.env.production
+      - .env.production  # Asegúrate de que este archivo exista en la raíz del proyecto jelly_frontend
 
 networks:
   jelly_network:
