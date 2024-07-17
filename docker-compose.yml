@@ -46,6 +46,16 @@ services:
     networks:
       - jelly_network
 
+  frontend:
+    build:
+      context: ./jelly_frontend
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - "80:80"
+    networks:
+      - jelly_network
+
   nginx:
     image: nginx:latest
     volumes:
@@ -55,10 +65,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
       - /root/.htpasswd:/etc/nginx/.htpasswd
     ports:
-      - "80:80"
       - "443:443"
     depends_on:
       - web
+      - frontend
     networks:
       - jelly_network
 
