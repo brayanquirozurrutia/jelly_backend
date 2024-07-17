@@ -1,16 +1,6 @@
 version: '3.9'
 
 services:
-  frontend:
-    build:
-      context: ./jelly_frontend
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-    ports:
-        - "3000:3000"
-    networks:
-      - jelly_network
-
   web:
     build: .
     command: gunicorn --bind 0.0.0.0:8000 jelly_backend.wsgi:application
