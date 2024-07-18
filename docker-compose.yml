@@ -6,6 +6,7 @@ services:
     command: gunicorn --bind 0.0.0.0:8000 jelly_backend.wsgi:application
     volumes:
       - .:/app
+      - ./staticfiles:/app/staticfiles
     ports:
       - "8000:8000"
     environment:
