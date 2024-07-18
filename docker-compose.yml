@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8080:8000"
+      - "8000:8000"
     environment:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
@@ -43,34 +43,6 @@ services:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     env_file:
       - .env
-    networks:
-      - jelly_network
-
-  frontend:
-    build:
-      context: ../jelly_frontend
-    volumes:
-      - ../jelly_frontend:/app
-    ports:
-      - "3000:80"
-    networks:
-      - jelly_network
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./staticfiles:/usr/share/nginx/html/static
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /root/.htpasswd:/etc/nginx/.htpasswd
-      - ../jelly_frontend/dist:/usr/share/nginx/html
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - web
-      - frontend
     networks:
       - jelly_network
 
