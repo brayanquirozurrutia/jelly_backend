@@ -120,7 +120,7 @@ GRAPHENE = {
     "SCHEMA": "jelly_backend.schema.schema"
 }
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://localhost')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = None
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'

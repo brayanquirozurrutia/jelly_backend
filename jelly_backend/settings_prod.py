@@ -55,5 +55,3 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.tecitostore.com',
     'https://www.api.tecitostore.com',
 ]
-
-CELERY_BROKER_URL = 'amqp://rabbitmq:5672'
