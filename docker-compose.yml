@@ -59,4 +59,4 @@ services:
 
 networks:
   jelly_network:
-    driver: bridge
+    external: true
