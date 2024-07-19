@@ -44,19 +44,6 @@ services:
     networks:
       - jelly_network
 
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt/archive/api.tecitostore.com:/etc/nginx/certs:ro
-    ports:
-      - "8080:80"
-      - "8443:443"
-    depends_on:
-      - web
-    networks:
-      - jelly_network
-
 networks:
   jelly_network:
-    external: true
+    driver: bridge
