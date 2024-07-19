@@ -29,6 +29,7 @@ pip-selfcheck.json
 
 ### dotenv template
 .env
+.env.production
 
 ### VirtualEnv template
 # Virtualenv

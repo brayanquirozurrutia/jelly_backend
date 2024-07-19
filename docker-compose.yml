@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 jelly_backend.wsgi:application
+    command: gunicorn --workers 3 --bind 0.0.0.0:8000 --access-logfile - --error-logfile - jelly_backend.wsgi:application
     ports:
       - "8000:8000"
     volumes:
@@ -11,7 +11,7 @@ services:
     environment:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL_DEV}
     depends_on:
       - rabbitmq
     env_file:

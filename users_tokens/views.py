@@ -144,7 +144,6 @@ class PasswordResetTokenNewTokenAPIView(APIView):
         responses={200: "The new token has been sent."},
     )
     def post(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
