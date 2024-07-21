@@ -17,6 +17,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'https://tecitostore.com',
+    'https://api.tecitostore.com',
 ]
 
 CORS_ALLOW_HEADERS = [
