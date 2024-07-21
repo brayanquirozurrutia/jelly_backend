@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,11 +28,13 @@ INSTALLED_APPS = [
     'graphene_django',
     'celery',
     'whitenoise.runserver_nostatic',
+    'django_celery_results',
     # Custom apps
     'authentication',
     'users',
     'users_tokens',
     'products',
+    'admin_app',
 ]
 
 MIDDLEWARE = [
@@ -121,12 +124,11 @@ GRAPHENE = {
 }
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = None
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
-#CELERY_TASK_DEFAULT_QUEUE = 'default'
 
 CELERY_WORKER_CONCURRENCY = 2
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
@@ -157,6 +159,20 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
+}
+
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('REDIS_URL'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
 }
 
 if ENVIRONMENT == 'production':

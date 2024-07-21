@@ -13,22 +13,21 @@ ALLOWED_HOSTS = [
     '179.43.127.60',
 ]
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-}
-
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     'https://tecitostore.com',
     'https://www.tecistostore.com',
     'https://api.tecitostore.com',
     'https://www.api.tecitostore.com',
 ]
+
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',
     'x-csrftoken',
 ]
+
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
@@ -37,6 +36,7 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
+
 CORS_EXPOSE_HEADERS = [
     'Content-Type',
     'X-CSRFToken',
