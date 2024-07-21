@@ -18,7 +18,7 @@ class UserType(DjangoObjectType):
 class Query(graphene.ObjectType):
     get_user = graphene.Field(UserType, id=graphene.ID(required=True))
 
-    @validate_token
+    #@validate_token
     def resolve_get_user(self, info, id):
         try:
             return User.objects.get(pk=id)

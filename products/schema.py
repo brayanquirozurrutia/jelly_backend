@@ -47,14 +47,14 @@ class Query(graphene.ObjectType):
         except Product.DoesNotExist:
             return None
 
-    @validate_token
+    #@validate_token
     def resolve_total_groups(self, info, search=None):
         groups = Group.objects.all()
         if search:
             groups = groups.filter(name__icontains=search)
         return groups.count()
 
-    @validate_token
+    #@validate_token
     def resolve_list_groups(self, info, search=None, page=None, page_size=None):
         groups = Group.objects.all()
 
@@ -66,14 +66,14 @@ class Query(graphene.ObjectType):
 
         return list(groups)
 
-    @validate_token
+    #@validate_token
     def resolve_total_categories(self, info, search=None):
         categories = Category.objects.all()
         if search:
             categories = categories.filter(name__icontains=search)
         return categories.count()
 
-    @validate_token
+    #@validate_token
     def resolve_list_categories(self, info, search=None, page=None, page_size=None):
         categories = Category.objects.all()
 
