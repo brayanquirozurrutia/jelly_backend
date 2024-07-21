@@ -17,6 +17,23 @@ services:
     networks:
       - jelly_network
 
+  celery:
+    build: .
+    command: celery -A jelly_backend worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+    environment:
+      DJANGO_ENV: ${DJANGO_ENV}
+      SECRET_KEY: ${SECRET_KEY}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    env_file:
+      - .env
+    networks:
+      - jelly_network
+
 networks:
   jelly_network:
     driver: bridge

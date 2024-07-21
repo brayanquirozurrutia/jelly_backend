@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'graphene_django',
     'celery',
     'whitenoise.runserver_nostatic',
-    'django_celery_results',
     # Custom apps
     'authentication',
     'users',
