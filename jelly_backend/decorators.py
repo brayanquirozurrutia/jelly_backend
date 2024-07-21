@@ -7,9 +7,15 @@ from graphql import GraphQLError
 def validate_token(func):
     @wraps(func)
     def wrapper(self, info, *args, **kwargs):
-        # Leer cookies del contexto de la solicitud
-        cookies = info.context.get('request', {}).COOKIES
+        # Obtener la solicitud del contexto
+        request = info.context.get('request')
+        if request is None:
+            raise GraphQLError('No se pudo obtener la solicitud.')
 
+        # Leer las cookies de la solicitud
+        cookies = request.COOKIES
+
+        # Obtener el token de acceso desde las cookies
         access_token = cookies.get('access_token')
         if not access_token:
             raise GraphQLError('Debes iniciar sesión')
