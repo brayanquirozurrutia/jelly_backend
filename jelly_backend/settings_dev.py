@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-import dj_database_url
+
 from jelly_backend.settings import *
 
 load_dotenv()
@@ -8,7 +8,6 @@ load_dotenv()
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'web',
     'localhost',
     '127.0.0.1',
     'tecitostore.com',
@@ -16,11 +15,8 @@ ALLOWED_HOSTS = [
     '179.43.127.60',
 ]
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL_DEV'))
-}
-
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://localhost:8081',
@@ -28,6 +24,7 @@ CORS_ALLOWED_ORIGINS = [
     'https://tecitostore.com',
     'https://api.tecitostore.com',
 ]
+
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',

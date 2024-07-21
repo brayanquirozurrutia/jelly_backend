@@ -11,36 +11,9 @@ services:
     environment:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
-      DATABASE_URL: ${DATABASE_URL_DEV}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - rabbitmq
-    env_file:
-      - .env
-    networks:
-      - jelly_network
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - jelly_network
-
-  celery:
-    build: .
-    command: celery -A jelly_backend worker --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - rabbitmq
-    environment:
-      DJANGO_ENV: ${DJANGO_ENV}
-      SECRET_KEY: ${SECRET_KEY}
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
     env_file:
       - .env
     networks:

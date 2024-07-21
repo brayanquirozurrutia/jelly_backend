@@ -36,6 +36,7 @@ urlpatterns = [
     path('users/', include('users.urls'), name='users'),
     path('users-tokens/', include('users_tokens.urls'), name='users_tokens'),
     path('products/', include('products.urls'), name='products'),
+    path('admin-app/', include('admin_app.urls'), name='admin_app'),
 ]
 
 if settings.DEBUG:
