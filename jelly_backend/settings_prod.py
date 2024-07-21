@@ -17,9 +17,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'https://tecitostore.com',
-    'https://www.tecistostore.com',
-    'https://api.tecitostore.com',
-    'https://www.api.tecitostore.com',
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -51,7 +48,4 @@ CSRF_COOKIE_PATH = '/'
 CSRF_COOKIE_DOMAIN = '.tecitostore.com'
 CSRF_TRUSTED_ORIGINS = [
     'https://tecitostore.com',
-    'https://api.tecitostore.com',
-    'https://www.tecitostore.com',
-    'https://www.api.tecitostore.com',
 ]
