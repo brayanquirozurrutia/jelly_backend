@@ -119,16 +119,17 @@ class UserLoginAPIView(APIView):
             value=str(refresh.access_token),
             httponly=httponly,
             secure=secure,
-            samesite='Lax',
+            samesite='None',
             max_age=access_token_lifetime,
             domain=domain
         )
+
         response.set_cookie(
             key='refresh_token',
             value=str(refresh),
             httponly=httponly,
             secure=secure,
-            samesite='Lax',
+            samesite='None',
             max_age=refresh_token_lifetime,
             domain=domain
         )
