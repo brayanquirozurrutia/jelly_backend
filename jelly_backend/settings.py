@@ -187,6 +187,7 @@ if ENVIRONMENT == 'production':
 
     CORS_ALLOWED_ORIGINS = [
         'https://tecitostore.com',
+        'https://api.tecitostore.com',
     ]
 
     CORS_ALLOW_HEADERS = [
@@ -218,6 +219,7 @@ if ENVIRONMENT == 'production':
     CSRF_COOKIE_DOMAIN = '.tecitostore.com'
     CSRF_TRUSTED_ORIGINS = [
         'https://tecitostore.com',
+        'https://api.tecitostore.com',
     ]
 else:
     from .settings_dev import *
