@@ -192,6 +192,7 @@ if ENVIRONMENT == 'production':
 
     CORS_ALLOW_HEADERS = [
         'content-type',
+        'accept',
         'authorization',
         'x-csrftoken',
     ]
