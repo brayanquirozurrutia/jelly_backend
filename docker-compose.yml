@@ -12,8 +12,6 @@ services:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
-    depends_on:
-      - rabbitmq
     env_file:
       - .env
     networks:
