@@ -94,49 +94,12 @@ class UserLoginAPIView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
-        response = Response({
+        return Response({
             'id': user.id,
             'user_admin': user.user_admin,
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh)
         }, status=status.HTTP_200_OK)
-
-        django_env = os.environ.get('DJANGO_ENV', 'development')
-
-        httponly = True
-        secure = True
-
-        if django_env == 'development':
-            httponly = False
-            secure = False
-            domain = 'localhost'
-        else:
-            domain = '.tecitostore.com'
-
-        access_token_lifetime = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
-        refresh_token_lifetime = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
-
-        response.set_cookie(
-            key='access_token',
-            value=str(refresh.access_token),
-            httponly=httponly,
-            secure=secure,
-            samesite='None',
-            max_age=access_token_lifetime,
-            domain=domain
-        )
-
-        response.set_cookie(
-            key='refresh_token',
-            value=str(refresh),
-            httponly=httponly,
-            secure=secure,
-            samesite='None',
-            max_age=refresh_token_lifetime,
-            domain=domain
-        )
-
-        csrf.get_token(request)
-
-        return response
 
 
 # PARA TESTEAR COSAS
