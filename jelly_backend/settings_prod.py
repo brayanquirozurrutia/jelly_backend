@@ -1,7 +1,4 @@
-import os
 from dotenv import load_dotenv
-import dj_database_url
-from jelly_backend.settings import *
 
 load_dotenv()
 
