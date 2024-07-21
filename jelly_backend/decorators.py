@@ -7,16 +7,19 @@ from graphql import GraphQLError
 def validate_token(func):
     @wraps(func)
     def wrapper(self, info, *args, **kwargs):
-        headers = info.context.get('headers', {})
-        authorization_header = headers.get('Authorization')
-        if not authorization_header or not authorization_header.startswith('Bearer '):
+        # Leer cookies del contexto de la solicitud
+        cookies = info.context.get('request', {}).COOKIES
+
+        access_token = cookies.get('access_token')
+        if not access_token:
             raise GraphQLError('Debes iniciar sesión')
 
-        token = authorization_header.split()[1]
         try:
-            access_token = AccessToken(token)
+            # Validar el token de acceso
+            access_token_obj = AccessToken(access_token)
         except TokenError:
             raise GraphQLError('Token inválido')
 
         return func(self, info, *args, **kwargs)
+
     return wrapper
