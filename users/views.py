@@ -107,6 +107,9 @@ class UserLoginAPIView(APIView):
         if django_env == 'development':
             httponly = False
             secure = False
+            domain = 'localhost'
+        else:
+            domain = '.tecitostore.com'
 
         access_token_lifetime = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
         refresh_token_lifetime = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
@@ -117,7 +120,8 @@ class UserLoginAPIView(APIView):
             httponly=httponly,
             secure=secure,
             samesite='Lax',
-            max_age=access_token_lifetime
+            max_age=access_token_lifetime,
+            domain=domain
         )
         response.set_cookie(
             key='refresh_token',
@@ -125,7 +129,8 @@ class UserLoginAPIView(APIView):
             httponly=httponly,
             secure=secure,
             samesite='Lax',
-            max_age=refresh_token_lifetime
+            max_age=refresh_token_lifetime,
+            domain=domain
         )
 
         csrf.get_token(request)
