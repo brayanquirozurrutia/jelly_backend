@@ -30,6 +30,7 @@ class Product(models.Model):
     image = models.URLField()
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     group = models.ForeignKey(Group, on_delete=models.PROTECT)
+    discount_price = models.IntegerField(blank=True, null=True, default=None)
 
     class Meta:
         db_table = "product"

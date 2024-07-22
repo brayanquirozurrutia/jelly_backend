@@ -200,9 +200,9 @@ class ProductSerializer(serializers.ModelSerializer):
             try:
                 # Open and process the image using Pillow
                 image = Image.open(image_file)
-                image = image.resize((320, 320))
+                image = image.resize((600, 600))
                 buffer = BytesIO()
-                image.save(buffer, format='WEBP', optimize=True, quality=75)
+                image.save(buffer, format='WEBP', optimize=True, quality=100)
                 buffer.seek(0)
 
                 # Upload optimized image to Cloudinary
