@@ -196,7 +196,7 @@ if ENVIRONMENT == 'production':
         'Content-type',
         'Accept',
         'Authorization',
-        'X-csrftoken',
+        'X-CSRFToken',
     ]
 
     CORS_ALLOW_METHODS = [
@@ -212,7 +212,6 @@ if ENVIRONMENT == 'production':
         'Content-Type',
         'X-CSRFToken',
         'Authorization',
-        'Set-Cookie',
         'Accept',
     ]
 
