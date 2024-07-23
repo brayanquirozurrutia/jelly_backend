@@ -129,6 +129,8 @@ class UserLoginAPIView(APIView):
             domain=domain
         )
 
+        return response
+
 
 # PARA TESTEAR COSAS
 class ListUsersAPIView(viewsets.ViewSet):
