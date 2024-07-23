@@ -193,10 +193,10 @@ if ENVIRONMENT == 'production':
     ]
 
     CORS_ALLOW_HEADERS = [
-        'content-type',
-        'accept',
-        'authorization',
-        'x-csrftoken',
+        'Content-type',
+        'Accept',
+        'Authorization',
+        'X-csrftoken',
     ]
 
     CORS_ALLOW_METHODS = [
@@ -211,6 +211,9 @@ if ENVIRONMENT == 'production':
     CORS_EXPOSE_HEADERS = [
         'Content-Type',
         'X-CSRFToken',
+        'Authorization',
+        'Set-Cookie',
+        'Accept',
     ]
 
     CSRF_COOKIE_AGE = 31449600
