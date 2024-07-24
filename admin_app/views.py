@@ -86,7 +86,7 @@ class UpdateBannerPhraseAPIView(APIView):
 
 
 class DeleteBannerPhraseAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_description="""

@@ -93,43 +93,12 @@ class UserLoginAPIView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
-        django_env = os.environ.get('DJANGO_ENV', 'development')
-
-        if django_env == 'development':
-            httponly = False
-            secure = False
-            domain = 'localhost'
-        else:
-            domain = '.tecitostore.com'
-            httponly = True
-            secure = True
-
-        response = Response({
+        return Response({
             'id': user.id,
             'user_admin': user.user_admin,
-        })
-
-        response.set_cookie(
-            key='access_token',
-            value=str(refresh.access_token),
-            httponly=httponly,
-            secure=secure,
-            samesite=None,
-            expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            domain=domain
-        )
-
-        response.set_cookie(
-            key='refresh_token',
-            value=str(refresh),
-            httponly=httponly,
-            secure=secure,
-            samesite=None,
-            expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            domain=domain
-        )
-
-        return response
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh),
+        }, status=status.HTTP_200_OK)
 
 
 # PARA TESTEAR COSAS
