@@ -21,8 +21,16 @@ class CategoryType(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    list_products = graphene.List(ProductType)
+    list_products_without_pagination = graphene.List(ProductType)
     get_product = graphene.Field(ProductType, id=graphene.ID(required=True))
+    total_products = graphene.Int(search=graphene.String())
+    list_products = graphene.List(
+        ProductType,
+        search=graphene.String(),
+        page=graphene.Int(),
+        page_size=graphene.Int()
+    )
+
     total_groups = graphene.Int(search=graphene.String())
     list_groups = graphene.List(
         GroupType,
@@ -30,6 +38,8 @@ class Query(graphene.ObjectType):
         page=graphene.Int(),
         page_size=graphene.Int()
     )
+    list_groups_without_pagination = graphene.List(GroupType)
+
     total_categories = graphene.Int(search=graphene.String())
     list_categories = graphene.List(
         CategoryType,
@@ -37,15 +47,36 @@ class Query(graphene.ObjectType):
         page=graphene.Int(),
         page_size=graphene.Int()
     )
+    list_categories_without_pagination = graphene.List(CategoryType)
 
-    def resolve_list_products(self, info):
-        return Product.objects.all()
+    def resolve_list_products_without_pagination(self, info):
+        try:
+            return Product.objects.all()
+        except Product.DoesNotExist:
+            return None
 
     def resolve_get_product(self, info, id):
         try:
             return Product.objects.get(pk=id)
         except Product.DoesNotExist:
             return None
+
+    def resolve_total_products(self, info, search=None):
+        products = Product.objects.all()
+        if search:
+            products = products.filter(name__icontains=search)
+        return products.count()
+
+    def resolve_list_products(self, info, search=None, page=None, page_size=None):
+        products = Product.objects.all()
+
+        if search:
+            products = products.filter(name__icontains=search)
+        if page is not None and page_size is not None:
+            offset = (page - 1) * page_size
+            products = products[offset:offset + page_size]
+
+        return list(products)
 
     #@validate_token
     def resolve_total_groups(self, info, search=None):
@@ -66,6 +97,12 @@ class Query(graphene.ObjectType):
 
         return list(groups)
 
+    def resolve_list_groups_without_pagination(self, info):
+        try:
+            return Group.objects.all()
+        except Group.DoesNotExist:
+            return None
+
     #@validate_token
     def resolve_total_categories(self, info, search=None):
         categories = Category.objects.all()
@@ -84,3 +121,9 @@ class Query(graphene.ObjectType):
             categories = categories[offset:offset + page_size]
 
         return list(categories)
+
+    def resolve_list_categories_without_pagination(self, info):
+        try:
+            return Category.objects.all()
+        except Category.DoesNotExist:
+            return None

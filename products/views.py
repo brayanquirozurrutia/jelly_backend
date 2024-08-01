@@ -18,7 +18,7 @@ from products.serializers import (
 )
 from jelly_backend.docs.swagger_tags import PRODUCTS_TAG
 from jelly_backend.permissions import IsAdminUserLoggedIn
-from products.models import Group, Category
+from products.models import Group, Category, Product
 
 load_dotenv()
 
@@ -194,7 +194,7 @@ class DeleteCategoryView(APIView):
 
 
 class ProductCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserLoggedIn]
     parser_classes = [MultiPartParser, FormParser]
     serializer_class = ProductSerializer
 
@@ -231,3 +231,94 @@ class ProductCreateView(APIView):
             serialized_product = ProductSerializer(product).data
             return Response(serialized_product, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProductUpdateView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = ProductSerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Update Product
+
+        About the endpoint:
+
+        - This endpoint updates an existing product in the system.
+        """,
+        operation_id="products_update_product",
+        operation_summary="Update Product",
+        request_body=ProductSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                name='image_file',
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                required=False,
+                description='Updated image of the product (optional)'
+            ),
+            openapi.Parameter(
+                name='product_id',
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='ID of the product to be updated'
+            )
+        ],
+        responses={
+            200: ProductSerializer,
+            400: 'Bad Request',
+            404: 'Not Found',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def patch(self, request, *args, **kwargs):
+        try:
+            product = Product.objects.get(id=kwargs['product_id'])
+        except Product.DoesNotExist:
+            return Response({"message": "Producto no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(
+            data=request.data,
+            instance=product,
+            partial=True,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        product = serializer.update(product, serializer.validated_data)
+        serialized_product = ProductSerializer(product).data
+        return Response(serialized_product, status=status.HTTP_200_OK)
+
+
+class DisableProductView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Disable Product
+
+        About the endpoint:
+
+        - This endpoint disables an existing product in the system.
+        """,
+        operation_id="products_disable_product",
+        operation_summary="Disable Product",
+        responses={
+            200: 'Product disabled successfully.',
+            400: 'Bad Request',
+            404: 'Not Found',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def post(self, request, product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"message": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        if product.is_disabled:
+            return Response({"message": "Producto ya está deshabilitado"}, status=status.HTTP_400_BAD_REQUEST)
+
+        product.is_disabled = True
+        product.save()
+        return Response('Producto deshabilitado exitosamente', status=status.HTTP_200_OK)

@@ -225,3 +225,51 @@ class ProductSerializer(serializers.ModelSerializer):
         product = Product.objects.create(**validated_data)
         self.instance = product
         return product
+
+    def update(self, instance, validated_data):
+        old_name = instance.name
+        new_name = validated_data.get('name', instance.name)
+
+        if old_name != new_name and instance.image:
+            try:
+                cloudinary.config(
+                    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+                    api_key=os.getenv("CLOUDINARY_API_KEY"),
+                    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+                )
+
+                image_url = instance.image
+                parts = image_url.split('/')
+                public_id_with_folder = '/'.join(parts[7:]).split('.')[0]
+                new_public_id = f"Products/{new_name}"
+
+                response = cloudinary.uploader.rename(
+                    from_public_id=public_id_with_folder,
+                    to_public_id=new_public_id,
+                    folder="Products"
+                )
+
+                new_image_url = response['secure_url']
+                validated_data['image'] = new_image_url
+
+            except cloudinary.exceptions.Error as e:
+                raise serializers.ValidationError('Ocurrió un error al intentar actualizar la imagen')
+
+        category_id = validated_data.get('category')
+        group_id = validated_data.get('group')
+
+        if category_id and category_id != instance.category.id:
+            category = Category.objects.get(id=category_id)
+            instance.category = category
+
+        if group_id and group_id != instance.group.id:
+            group = Group.objects.get(id=group_id)
+            instance.group = group
+
+        for attr, value in validated_data.items():
+            if attr not in ['category', 'group']:
+                setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
