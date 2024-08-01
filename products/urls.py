@@ -7,6 +7,8 @@ from products.views import (
     DeleteGroupView,
     EditCategoryView,
     DeleteCategoryView,
+    ProductUpdateView,
+    DisableProductView,
 )
 
 urlpatterns = [
@@ -17,4 +19,6 @@ urlpatterns = [
     path('categories-update/<uuid:category_id>/', EditCategoryView.as_view(), name='category-edit'),
     path('groups-delete/<uuid:group_id>/', DeleteGroupView.as_view(), name='group-delete'),
     path('categories-delete/<uuid:category_id>/', DeleteCategoryView.as_view(), name='category-delete'),
+    path('update/<uuid:product_id>/', ProductUpdateView.as_view(), name='product-update'),
+    path('disable/<uuid:product_id>/', DisableProductView.as_view(), name='product-disable'),
 ]

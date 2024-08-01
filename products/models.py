@@ -31,6 +31,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     group = models.ForeignKey(Group, on_delete=models.PROTECT)
     discount_price = models.IntegerField(blank=True, null=True, default=None)
+    is_disabled = models.BooleanField(default=False, blank=True, null=True)
 
     class Meta:
         db_table = "product"
