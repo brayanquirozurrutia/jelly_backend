@@ -9,6 +9,8 @@ from products.views import (
     DeleteCategoryView,
     ProductUpdateView,
     DisableProductView,
+    CreateProductImageFileAPIView,
+    CreateVersionAPIView,
 )
 
 urlpatterns = [
@@ -21,4 +23,6 @@ urlpatterns = [
     path('categories-delete/<uuid:category_id>/', DeleteCategoryView.as_view(), name='category-delete'),
     path('update/<uuid:product_id>/', ProductUpdateView.as_view(), name='product-update'),
     path('disable/<uuid:product_id>/', DisableProductView.as_view(), name='product-disable'),
+    path('upload-image/<uuid:product_id>/', CreateProductImageFileAPIView.as_view(), name='upload-image'),
+    path('create-version/<uuid:product_id>/', CreateVersionAPIView.as_view(), name='create-version'),
 ]

@@ -1,13 +1,22 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from products.models import Product, Group, Category
+from products.models import Product, Group, Category, ProductImageFile, Version
 
 from jelly_backend.decorators import validate_token
 
 
 class ProductType(DjangoObjectType):
+    images = graphene.List(lambda: ProductImageFileType)
+    product_version = graphene.List(lambda: VersionType)
+
     class Meta:
         model = Product
+
+    def resolve_images(self, info):
+        return ProductImageFile.objects.filter(product=self)
+
+    def resolve_product_version(self, info):
+        return Version.objects.filter(product=self)
 
 
 class GroupType(DjangoObjectType):
@@ -20,7 +29,18 @@ class CategoryType(DjangoObjectType):
         model = Category
 
 
+class ProductImageFileType(DjangoObjectType):
+    class Meta:
+        model = ProductImageFile
+
+
+class VersionType(DjangoObjectType):
+    class Meta:
+        model = Version
+
+
 class Query(graphene.ObjectType):
+    # --- Products ---
     list_products_without_pagination = graphene.List(ProductType)
     get_product = graphene.Field(ProductType, id=graphene.ID(required=True))
     total_products = graphene.Int(search=graphene.String())
@@ -31,6 +51,7 @@ class Query(graphene.ObjectType):
         page_size=graphene.Int()
     )
 
+    # --- Groups ---
     total_groups = graphene.Int(search=graphene.String())
     list_groups = graphene.List(
         GroupType,
@@ -40,6 +61,7 @@ class Query(graphene.ObjectType):
     )
     list_groups_without_pagination = graphene.List(GroupType)
 
+    # --- Categories ---
     total_categories = graphene.Int(search=graphene.String())
     list_categories = graphene.List(
         CategoryType,
