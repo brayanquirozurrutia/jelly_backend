@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, logger
 from drf_yasg import openapi
 from products.serializers import (
     CreateGroupSerializer,
@@ -14,7 +14,9 @@ from products.serializers import (
     CreateCategorySerializer,
     UpdateCategorySerializer,
     ProductSerializer,
-    DeleteCategorySerializer
+    DeleteCategorySerializer,
+    ProductImageFileSerializer,
+    VersionSerializer,
 )
 from jelly_backend.docs.swagger_tags import PRODUCTS_TAG
 from jelly_backend.permissions import IsAdminUserLoggedIn
@@ -322,3 +324,73 @@ class DisableProductView(APIView):
         product.is_disabled = True
         product.save()
         return Response('Producto deshabilitado exitosamente', status=status.HTTP_200_OK)
+
+
+class CreateProductImageFileAPIView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = ProductImageFileSerializer
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Create Product Image File
+
+        About the endpoint:
+
+        - This endpoint creates a new image file for a product in the system.
+        """,
+        operation_id="products_create_product_image_file",
+        operation_summary="Create Product Image File",
+        request_body=ProductImageFileSerializer,
+        responses={
+            201: 'Image file created successfully.',
+            400: 'Bad Request',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def post(self, request, *args, **kwargs):
+        product_id = kwargs.get('product_id')
+        serializer = self.serializer_class(
+            data=request.data, context={
+                'request': request,
+                'product_id': product_id
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateVersionAPIView(APIView):
+    permission_classes = [IsAdminUserLoggedIn]
+    serializer_class = VersionSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        operation_description="""
+        ## Create Version
+
+        About the endpoint:
+
+        - This endpoint creates a new version in the system.
+        """,
+        operation_id="products_create_version",
+        operation_summary="Create Version",
+        request_body=VersionSerializer,
+        responses={
+            201: VersionSerializer,
+            400: 'Bad Request',
+        },
+        tags=[PRODUCTS_TAG]
+    )
+    def post(self, request, *args, **kwargs):
+        product_id = kwargs.get('product_id')
+        serializer = self.serializer_class(
+            data=request.data, context={
+                'request': request,
+                'product_id': product_id
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

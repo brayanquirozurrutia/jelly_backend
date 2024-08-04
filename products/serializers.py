@@ -1,14 +1,13 @@
 from django.db.models.deletion import ProtectedError
 from rest_framework import serializers
 
-from products.models import Group, Category, Product
-from io import BytesIO
+from products.models import Group, Category, Product, ProductImageFile, Version
 import os
-from PIL import Image
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-from cloudinary.exceptions import Error as CloudinaryError
+
+from products.utils import upload_image_to_cloudinary
 
 
 class BaseCreateSerializer(serializers.ModelSerializer):
@@ -197,31 +196,11 @@ class ProductSerializer(serializers.ModelSerializer):
         # Upload optimized image to Cloudinary
         image_file = self.context['request'].FILES.get('image_file')
         if image_file:
-            try:
-                # Open and process the image using Pillow
-                image = Image.open(image_file)
-                image = image.resize((600, 600))
-                buffer = BytesIO()
-                image.save(buffer, format='WEBP', optimize=True, quality=100)
-                buffer.seek(0)
-
-                # Upload optimized image to Cloudinary
-                cloudinary.config(
-                    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-                    api_key=os.getenv("CLOUDINARY_API_KEY"),
-                    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-                )
-                uploaded_image = cloudinary.uploader.upload(
-                    file=buffer,
-                    public_id=validated_data['name'],
-                    folder="Products",
-                    overwrite=True,
-                    resource_type="image"
-                )
-                validated_data['image'] = uploaded_image['secure_url']
-            except CloudinaryError:
-                raise serializers.ValidationError(f"Error uploading image to Cloudinary")
-
+            url = upload_image_to_cloudinary(
+                image_file=image_file,
+                folder="Products",
+            )
+            validated_data['image'] = url
         product = Product.objects.create(**validated_data)
         self.instance = product
         return product
@@ -273,3 +252,85 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
+class ProductImageFileSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = ProductImageFile
+        fields = [
+            'id',
+            'image',
+        ]
+
+    def validate(self, attrs):
+        product_id = self.context['product_id']
+        try:
+            Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("El producto no existe.")
+        return attrs
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        product = Product.objects.get(id=product_id)
+        validated_data['product'] = product
+        folder_name = f"Products/ProductsImages"
+        image = validated_data['image']
+        if image:
+            url = upload_image_to_cloudinary(
+                image_file=image,
+                folder=folder_name,
+            )
+            validated_data['image'] = url
+        product_image = ProductImageFile.objects.create(**validated_data)
+        self.instance = product_image
+        return product_image
+
+
+class VersionSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=True)
+    stock = serializers.IntegerField(required=True)
+    image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = Version
+        fields = [
+            'id',
+            'name',
+            'stock',
+            'image',
+        ]
+
+    @staticmethod
+    def validate_name(name):
+        return name.strip().upper()
+
+    def validate(self, attrs):
+        stock = attrs.get('stock')
+        product_id = self.context.get('product_id')
+
+        if stock < 0:
+            raise serializers.ValidationError("El stock no puede ser negativo.")
+
+        try:
+            Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("El producto no existe.")
+        return attrs
+
+    def create(self, validated_data):
+        product_id = self.context.get('product_id')
+        product = Product.objects.get(id=product_id)
+        validated_data['product'] = product
+        folder_name = f"Products/ProductsVersions"
+        image = validated_data['image']
+        if image:
+            url = upload_image_to_cloudinary(
+                image_file=image,
+                folder=folder_name,
+            )
+            validated_data['image'] = url
+        version = Version.objects.create(**validated_data)
+        self.instance = version
+        return version
