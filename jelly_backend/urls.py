@@ -13,7 +13,6 @@ from rest_framework.permissions import AllowAny
 
 from jelly_backend import settings
 
-
 schema_view = get_schema_view(
     openapi.Info(
         title="Jelly API",
@@ -53,5 +52,5 @@ if settings.DEBUG:
 
 else:
     urlpatterns += [
-        path('graphql', (GraphQLView.as_view(graphiql=False))),
+        path('graphql', (ensure_csrf_cookie(GraphQLView.as_view(graphiql=False)))),
     ]

@@ -1,8 +1,9 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from products.models import Product, Group, Category, ProductImageFile, Version
 
-from jelly_backend.decorators import validate_token
+from jelly_backend.decorators import jwt_required
+from jelly_backend.permissions import IsAdminUserLoggedIn
+from products.models import Product, Group, Category, ProductImageFile, Version
 
 
 class ProductType(DjangoObjectType):
@@ -71,6 +72,7 @@ class Query(graphene.ObjectType):
     )
     list_categories_without_pagination = graphene.List(CategoryType)
 
+    # --- Products ---
     def resolve_list_products_without_pagination(self, info):
         try:
             return Product.objects.all()
@@ -100,14 +102,15 @@ class Query(graphene.ObjectType):
 
         return list(products)
 
-    #@validate_token
+    # --- Groups ---
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_total_groups(self, info, search=None):
         groups = Group.objects.all()
         if search:
             groups = groups.filter(name__icontains=search)
         return groups.count()
 
-    #@validate_token
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_list_groups(self, info, search=None, page=None, page_size=None):
         groups = Group.objects.all()
 
@@ -119,20 +122,22 @@ class Query(graphene.ObjectType):
 
         return list(groups)
 
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_list_groups_without_pagination(self, info):
         try:
             return Group.objects.all()
         except Group.DoesNotExist:
             return None
 
-    #@validate_token
+    # --- Categories ---
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_total_categories(self, info, search=None):
         categories = Category.objects.all()
         if search:
             categories = categories.filter(name__icontains=search)
         return categories.count()
 
-    #@validate_token
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_list_categories(self, info, search=None, page=None, page_size=None):
         categories = Category.objects.all()
 
@@ -144,6 +149,7 @@ class Query(graphene.ObjectType):
 
         return list(categories)
 
+    @jwt_required(permission_required=IsAdminUserLoggedIn)
     def resolve_list_categories_without_pagination(self, info):
         try:
             return Category.objects.all()

@@ -108,5 +108,4 @@ class CSRFTOKENView(APIView):
         ))},
     )
     def get(self, request, *args, **kwargs):
-        csrf_token = get_token(request)
-        return Response({'csrfToken': csrf_token}, status=status.HTTP_200_OK)
+        return Response({'detail': 'CSRF cookie set'}, status=status.HTTP_200_OK)

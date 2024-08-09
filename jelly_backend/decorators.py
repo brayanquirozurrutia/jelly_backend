@@ -1,28 +1,56 @@
-from functools import wraps
-from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import AccessToken
+import os
+import jwt
 from graphql import GraphQLError
+from functools import wraps
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 
-def validate_token(func):
-    @wraps(func)
-    def wrapper(self, info, *args, **kwargs):
-        request = info.context.get('request')
-        if request is None:
-            raise GraphQLError('No se pudo obtener la solicitud.')
+def jwt_required(
+        permission_required: callable = None
+) -> callable:
+    """
+    Decorator to check if a JWT token is provided in the request and if it is valid.
+    :param permission_required: A callable that checks if the user has the required permission.
+    :return: A decorator function.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapped(root, info, *args, **kwargs):
+            request = info.context
+            access_token = request.COOKIES.get('access_token')
 
-        # Imprimir el contexto para depuración
-        print("Contexto de la solicitud:", info.context)
+            if not access_token:
+                raise GraphQLError('No JWT token provided')
 
-        cookies = request.COOKIES
-        access_token = cookies.get('access_token')
-        if not access_token:
-            raise GraphQLError('Debes iniciar sesión')
+            try:
+                secret_key = os.getenv('SECRET_KEY')
+                payload = jwt.decode(access_token, secret_key, algorithms=['HS256'])
+            except jwt.ExpiredSignatureError:
+                raise GraphQLError('JWT token has expired')
+            except jwt.InvalidTokenError as e:
+                raise GraphQLError(f'Invalid JWT token: {str(e)}')
 
-        try:
-            access_token_obj = AccessToken(access_token)
-        except TokenError:
-            raise GraphQLError('Token inválido')
+            # Simular usuario basado en la carga útil del token
+            user_id = payload.get('user_id')
+            if user_id:
+                User = get_user_model()
+                try:
+                    user = User.objects.get(pk=user_id)
+                except User.DoesNotExist:
+                    user = AnonymousUser()
+                request.user = user
+            else:
+                request.user = AnonymousUser()
 
-        return func(self, info, *args, **kwargs)
-    return wrapper
+            if permission_required:
+                permission_checker = permission_required()
+                # Pasar 'None' como argumento 'view' para cumplir con la firma del método
+                if not permission_checker.has_permission(request, None):
+                    raise GraphQLError('Permission denied')
+
+            return func(root, info, *args, **kwargs)
+
+        return wrapped
+
+    return decorator
