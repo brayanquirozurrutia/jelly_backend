@@ -48,6 +48,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom middleware
+    'jelly_backend.middleware.JWTAuthCookieMiddleware',
 ]
 
 ROOT_URLCONF = 'jelly_backend.urls'
@@ -174,8 +176,43 @@ CACHES = {
     }
 }
 
+CORS_ALLOW_HEADERS = [
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'X-CSRFToken',
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_EXPOSE_HEADERS = [
+    'Content-Type',
+    'X-CSRFToken',
+    'Authorization',
+    'Accept',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_AGE = 31449600  # 1 año
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+
 if ENVIRONMENT == 'production':
     DEBUG = False
+
+    SESSION_COOKIE_SECURE = True
 
     ALLOWED_HOSTS = [
         'tecitostore.com',
@@ -184,48 +221,39 @@ if ENVIRONMENT == 'production':
         'www.tecitostore.com',
     ]
 
-    CORS_ALLOW_CREDENTIALS = True
-
     CORS_ALLOWED_ORIGINS = [
         'https://tecitostore.com',
         'https://api.tecitostore.com',
         'https://www.tecitostore.com',
     ]
 
-    CORS_ALLOW_HEADERS = [
-        'Content-type',
-        'Accept',
-        'Authorization',
-        'X-CSRFToken',
-    ]
-
-    CORS_ALLOW_METHODS = [
-        'GET',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
-        'OPTIONS',
-    ]
-
-    CORS_EXPOSE_HEADERS = [
-        'Content-Type',
-        'X-CSRFToken',
-        'Authorization',
-        'Accept',
-    ]
-
-    CSRF_COOKIE_AGE = 31449600
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
-    CSRF_COOKIE_NAME = 'csrftoken'
-    CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
-    CSRF_COOKIE_PATH = '/'
     CSRF_COOKIE_DOMAIN = '.tecitostore.com'
     CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:3000',
+        'https://localhost:8081',
+        'http://localhost:8000',
         'https://tecitostore.com',
         'https://api.tecitostore.com',
-        'https://www.tecitostore.com',
     ]
 else:
-    from .settings_dev import *
+    DEBUG = True
+
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'http://localhost:8000',
+    ]
+
+    CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = False
+    CSRF_COOKIE_DOMAIN = None
+
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:3000',
+        'http://localhost:8000',
+    ]
+
+CORS_ORIGIN_WHITELIST = CORS_ALLOWED_ORIGINS

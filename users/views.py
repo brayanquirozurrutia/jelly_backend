@@ -10,6 +10,7 @@ from users.serializers import (
 from jelly_backend.docs.swagger_tags import USER_TAG
 from jelly_backend import settings
 from users.models import User
+from django.middleware.csrf import get_token
 
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -90,41 +91,62 @@ class UserLoginAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-
+        user_admin = user.user_admin
         refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
-        return Response({
+        environment = os.getenv('DJANGO_ENV')
+
+        if environment == 'development':
+            secure = False
+            same_site = 'Lax'
+        else:
+            secure = True
+            same_site = 'None'
+
+        response = Response({
             'id': user.id,
-            'user_admin': user.user_admin,
-            'access_token': str(refresh.access_token),
-            'refresh_token': str(refresh),
+            'user_admin': user_admin,
         }, status=status.HTTP_200_OK)
 
+        response.set_cookie(
+            key='access_token',
+            value=access_token,
+            httponly=True,
+            secure=secure,
+            samesite=same_site
+        )
 
-# PARA TESTEAR COSAS
-class ListUsersAPIView(viewsets.ViewSet):
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=True,
+            secure=secure,
+            samesite=same_site
+        )
+
+        return response
+
+
+class UserLogoutAPIView(APIView):
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_description="""
-        ## List users
+        ## Logout
         
         About the endpoint:
         
-        - This endpoint lists all the users in the system.
+        - This endpoint logs the user out of the system.
         
-        - The users are listed in a paginated way.""",
-        operation_id="List users",
+        - The user will no longer be able to access protected endpoints.""",
+        operation_id="Logout",
         tags=USER_TAG,
-        operation_summary="List users",
-        responses={200: UserSerializer(many=True)},
+        operation_summary="Logout",
+        responses={204: 'No Content'},
     )
-    def list(self, request):
-        """
-        List users.
-        """
-        queryset = User.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
-        response_data = serializer.data
-        return Response(response_data, status=status.HTTP_200_OK)
+    def post(self, request):
+        response = Response(status=status.HTTP_204_NO_CONTENT)
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        return response

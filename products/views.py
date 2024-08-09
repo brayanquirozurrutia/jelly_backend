@@ -327,7 +327,7 @@ class DisableProductView(APIView):
 
 
 class CreateProductImageFileAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserLoggedIn]
     parser_classes = [MultiPartParser, FormParser]
     serializer_class = ProductImageFileSerializer
 
