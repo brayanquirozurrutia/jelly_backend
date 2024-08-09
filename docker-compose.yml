@@ -16,6 +16,9 @@ services:
       - .env
     networks:
       - jelly_network
+    depends_on:
+      - redis
+      - rabbitmq
 
   celery:
     build: .
@@ -24,6 +27,8 @@ services:
       - .:/app
     depends_on:
       - web
+      - redis
+      - rabbitmq
     environment:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
@@ -31,6 +36,24 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
     env_file:
       - .env
+    networks:
+      - jelly_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - jelly_network
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - jelly_network
 
