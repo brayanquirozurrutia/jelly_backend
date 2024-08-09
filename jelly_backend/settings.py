@@ -97,7 +97,6 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'jelly_backend.exceptions.custom_exception_handler',
 }
 
-
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {

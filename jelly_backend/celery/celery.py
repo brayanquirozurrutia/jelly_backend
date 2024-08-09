@@ -15,3 +15,8 @@ app.conf.update(
 )
 
 app.autodiscover_tasks()
+
+app.conf.update(
+    result_backend=os.getenv('CELERY_RESULT_BACKEND'),
+    broker_url=os.getenv('CELERY_BROKER_URL'),
+)
