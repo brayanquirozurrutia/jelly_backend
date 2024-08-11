@@ -8,11 +8,6 @@ from users.serializers import (
     UserSerializer, UserLoginSerializer
 )
 from jelly_backend.docs.swagger_tags import USER_TAG
-from jelly_backend import settings
-from users.models import User
-from django.middleware.csrf import get_token
-
-
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import os

@@ -1,0 +1,44 @@
+# Permitir acceso completo a Googlebot
+User-agent: Googlebot
+Allow: /
+
+# Permitir acceso completo a Bingbot
+User-agent: Bingbot
+Allow: /
+
+# Bloquear acceso a la API para todos los demás bots
+User-agent: *
+Disallow: /api/
+
+# Bloquear acceso a áreas administrativas
+Disallow: /admin/
+
+# Bloquear acceso a rutas de prueba o desarrollo
+Disallow: /test/
+Disallow: /tests/
+Disallow: /dev/
+
+# Bloquear acceso a archivos de configuración o logs
+Disallow: /config/
+Disallow: /logs/
+
+# Bloquear acceso a directorios privados
+Disallow: /private/
+
+# Bloquear acceso a páginas de error personalizadas
+Disallow: /500/
+Disallow: /404/
+
+# Bloquear acceso a archivos de carga o descarga
+Disallow: /uploads/
+
+# Bloquear acceso a endpoints de administración de usuario
+Disallow: /users/
+Disallow: /accounts/
+
+# Bloquear acceso a otras rutas internas
+Disallow: /internal/
+Disallow: /hidden/
+
+# Permitir acceso completo al resto del sitio para todos los demás bots
+Allow: /
