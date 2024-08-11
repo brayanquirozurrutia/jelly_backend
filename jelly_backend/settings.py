@@ -242,20 +242,7 @@ if ENVIRONMENT == 'production':
         'https://www.tecitostore.com',
     ]
 
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
 
-    X_FRAME_OPTIONS = 'DENY'
-
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r'^https://tecitostore\.com$',
-        r'^https://www\.tecitostore\.com$',
-        r'^https://api\.tecitostore\.com$',
-    ]
 
 else:
     DEBUG = True
