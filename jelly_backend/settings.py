@@ -252,8 +252,11 @@ if ENVIRONMENT == 'production':
     X_FRAME_OPTIONS = 'DENY'
 
     CORS_ALLOWED_ORIGIN_REGEXES = [
-        r'^https://.*\.tecitostore\.com$',
+        r'^https://tecitostore\.com$',
+        r'^https://www\.tecitostore\.com$',
+        r'^https://api\.tecitostore\.com$',
     ]
+
 else:
     DEBUG = True
 
