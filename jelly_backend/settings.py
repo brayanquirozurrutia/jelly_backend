@@ -241,6 +241,14 @@ if ENVIRONMENT == 'production':
         'https://www.tecitostore.com',
     ]
 
+    # TODO: VER RATELIMIT POR ENDPOINT
+
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r'^https://tecitostore\.com$',
+        r'^https://www\.tecitostore\.com$',
+        r'^https://api\.tecitostore\.com$',
+    ]
+
 else:
     DEBUG = True
 
