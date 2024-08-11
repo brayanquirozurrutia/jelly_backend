@@ -243,7 +243,6 @@ if ENVIRONMENT == 'production':
         'https://www.tecitostore.com',
     ]
 
-    # TODO: VER RATELIMIT POR ENDPOINT
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000
