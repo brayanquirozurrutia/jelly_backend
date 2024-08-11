@@ -243,6 +243,8 @@ if ENVIRONMENT == 'production':
 
     # TODO: VER RATELIMIT POR ENDPOINT
 
+    SECURE_SSL_REDIRECT = True
+
     CORS_ALLOWED_ORIGIN_REGEXES = [
         r'^https://tecitostore\.com$',
         r'^https://www\.tecitostore\.com$',
