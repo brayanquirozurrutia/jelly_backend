@@ -51,7 +51,6 @@ MIDDLEWARE = [
     'django_ratelimit.middleware.RatelimitMiddleware',
     # Custom middleware
     'jelly_backend.middleware.JWTAuthCookieMiddleware',
-    'jelly_backend.middleware.GlobalRateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'jelly_backend.urls'
@@ -241,8 +240,6 @@ if ENVIRONMENT == 'production':
         'https://api.tecitostore.com',
         'https://www.tecitostore.com',
     ]
-
-
 
 else:
     DEBUG = True
