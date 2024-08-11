@@ -223,11 +223,13 @@ if ENVIRONMENT == 'production':
         '172.18.0.4:8000',
     ]
 
-    CORS_ALLOWED_ORIGINS = [
+    CORS_ALLOW_ORIGINS = [
         'https://tecitostore.com',
         'https://api.tecitostore.com',
         'https://www.tecitostore.com',
     ]
+
+    CORS_ALLOWED_ORIGINS = CORS_ALLOW_ORIGINS
 
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
@@ -247,7 +249,6 @@ if ENVIRONMENT == 'production':
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
 
