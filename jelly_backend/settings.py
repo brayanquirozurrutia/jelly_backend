@@ -48,8 +48,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',
     # Custom middleware
     'jelly_backend.middleware.JWTAuthCookieMiddleware',
+    'jelly_backend.middleware.GlobalRateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'jelly_backend.urls'
@@ -212,12 +214,14 @@ if ENVIRONMENT == 'production':
     DEBUG = False
 
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
 
     ALLOWED_HOSTS = [
         'tecitostore.com',
         'api.tecitostore.com',
         '179.43.127.60',
         'www.tecitostore.com',
+        '172.18.0.4:8000',
     ]
 
     CORS_ALLOWED_ORIGINS = [
@@ -235,6 +239,20 @@ if ENVIRONMENT == 'production':
         'http://localhost:8000',
         'https://tecitostore.com',
         'https://api.tecitostore.com',
+        'https://www.tecitostore.com',
+    ]
+
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+
+    X_FRAME_OPTIONS = 'DENY'
+
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r'^https://.*\.tecitostore\.com$',
     ]
 else:
     DEBUG = True
@@ -254,5 +272,16 @@ else:
         'http://localhost:3000',
         'http://localhost:8000',
     ]
+
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    X_FRAME_OPTIONS = 'ALLOW'
+    CONTENT_SECURITY_POLICY = ''
+    SECURE_BROWSER_XSS_FILTER = False
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
 
 CORS_ORIGIN_WHITELIST = CORS_ALLOWED_ORIGINS
