@@ -52,5 +52,5 @@ if settings.DEBUG:
 
 else:
     urlpatterns += [
-        path('graphql', (ensure_csrf_cookie(GraphQLView.as_view(graphiql=False)))),
+        path('graphql', ensure_csrf_cookie(GraphQLView.as_view(graphiql=False))),
     ]
