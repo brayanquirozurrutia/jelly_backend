@@ -262,11 +262,12 @@ if ENVIRONMENT == 'production':
 else:
     DEBUG = True
 
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    ALLOWED_HOSTS = ['*']
 
     CORS_ALLOWED_ORIGINS = [
         'http://localhost:3000',
         'http://localhost:8000',
+        'exp://192.168.0.24:8081',
     ]
 
     CSRF_COOKIE_SECURE = False
@@ -276,6 +277,7 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:3000',
         'http://localhost:8000',
+        'exp://192.168.0.24:8081',
     ]
 
     SECURE_SSL_REDIRECT = False

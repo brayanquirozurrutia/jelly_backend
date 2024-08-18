@@ -143,3 +143,9 @@ class UserLoginSerializer(serializers.ModelSerializer):
         user.save()
         self.instance = user
         return user
+
+
+class VerifyICSerializer(serializers.Serializer):
+    front_id_image = serializers.ImageField(required=True)
+    back_id_image = serializers.ImageField(required=True)
+    face_image = serializers.ImageField(required=True)

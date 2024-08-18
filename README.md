@@ -39,3 +39,8 @@ Asegúrate de tener instalados los siguientes programas:
 
 
 docker-compose -f docker-compose.dev.yml down
+
+
+
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate

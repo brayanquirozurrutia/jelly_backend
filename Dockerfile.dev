@@ -1,15 +1,44 @@
+# Etapa única: Construcción y ejecución
 FROM python:3.10-slim
 
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Instalar dependencias necesarias
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    curl \
+    libleptonica-dev \
+    libtesseract-dev \
+    tesseract-ocr \
+    tesseract-ocr-spa \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libgtk-3-dev \
+    libcanberra-gtk* \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# Descargar y colocar el archivo de datos del idioma
+RUN mkdir -p /usr/share/tesseract-ocr/5/tessdata \
+    && curl -fsSL -o /usr/share/tesseract-ocr/5/tessdata/spa.traineddata \
+    https://github.com/tesseract-ocr/tessdata/raw/main/spa.traineddata \
+    && ls -l /usr/share/tesseract-ocr/5/tessdata/spa.traineddata
+
+# Copiar y instalar dependencias de Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar solo los archivos necesarios de la aplicación
 COPY . .
 
+# Configurar variables de entorno
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata/
 ENV PYTHONUNBUFFERED=1
 
+# Exponer el puerto 8000 para la aplicación
 EXPOSE 8000
 
+# Comando por defecto para ejecutar la aplicación
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

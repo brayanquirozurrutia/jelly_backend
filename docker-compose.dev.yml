@@ -17,6 +17,7 @@ services:
       REDIS_URL: ${REDIS_URL}
     depends_on:
       - rabbitmq
+      - redis
     env_file:
       - .env
     networks:
@@ -41,7 +42,9 @@ services:
       - jelly_network_dev
 
   celery:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     command: celery -A jelly_backend worker --loglevel=info
     volumes:
       - .:/app
