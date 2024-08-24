@@ -1,234 +1,183 @@
 import os
+
 import cv2
 import pytesseract
 import numpy as np
-from PIL import Image
-import re
 import face_recognition
 
-# Configurar la variable de entorno TESSDATA_PREFIX
 os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/tessdata/'
-
-# Configurar el comando de Tesseract
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
-
-class ChileanIDValidator:
+class ImageAnalyzer:
     """
-    Base class for validating Chilean ID cards.
+    Base class for image analysis.
 
-    Attributes:
-    - image_file: The image file to validate.
-    - image: PIL Image object.
-    - image_np: Numpy array representation of the image.
-    - gray: Grayscale version of the image.
-    - thresh: Thresholded image.
-    - text: Extracted text from the image.
+    :param image: numpy array representing the image
 
     Methods:
-    - preprocess_image: Preprocess the image for text extraction.
-    - extract_text: Use OCR to extract text from the image.
-    - clean_text: Clean up the extracted text.
-    - validate_resolution: Check if the image resolution is sufficient.
-    - validate_edges: Check if the image edges are visible.
-    - validate_orientation: Check if the image is correctly oriented.
-    - validate_text_presence: Check if the image contains text.
-    - validate: Run all validation checks.
-
-    Subclasses should implement the `validate` method to include specific validations.
+    is_blurry: Check if the image is blurry
+    has_text: Check if the image has text
+    is_cut: Check if the image is cut
+    is_correct_orientation: Check if the image is in the correct orientation
+    has_face: Check if the image has a face
     """
-    def __init__(self, image_file):
-        self.image = Image.open(image_file)
-        self.image_np = np.array(self.image.convert('RGB'))
-        self.gray = cv2.cvtColor(self.image_np, cv2.COLOR_RGB2GRAY)
-        self.thresh = None
-        self.text = ""
+    def __init__(self, image):
+        self.image = image
 
-    def preprocess_image(self):
-        """
-        Preprocess the image for text extraction.
-        :return: None
-        """
-        blurred = cv2.GaussianBlur(self.gray, (5, 5), 0)
-        equalized = cv2.equalizeHist(blurred)
-        self.thresh = cv2.adaptiveThreshold(equalized, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                            cv2.THRESH_BINARY, 11, 2)
-        kernel = np.ones((3, 3), np.uint8)
-        self.thresh = cv2.dilate(self.thresh, kernel, iterations=2)
-        self.thresh = cv2.erode(self.thresh, kernel, iterations=1)
+    def is_blurry(self, threshold=40) -> bool:
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (3, 3), 0)
+        laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+        return laplacian_var < threshold
 
-    def extract_text(self):
-        """
-        Extract text from the preprocessed image.
-        :return: None
-        """
-        custom_config = r'--oem 3 --psm 6'
-        self.text = pytesseract.image_to_string(self.thresh, lang='spa', config=custom_config)
+    def has_text(self) -> bool:
+        text = pytesseract.image_to_string(self.image)
+        return bool(text.strip())
 
-    def clean_text(self):
-        """
-        Clean up the extracted text.
-        :return: None
-        """
-        self.text = re.sub(r'\s+', ' ', self.text).strip()
-        self.text = re.sub(r'[^\w\s\-.,]', '', self.text)
+    def is_cut(self, expected_aspect_ratio=(85.6, 53.98)) -> bool:
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            aspect_ratio = w / h
+            expected_ratio = expected_aspect_ratio[0] / expected_aspect_ratio[1]
+            if 0.9 < aspect_ratio / expected_ratio < 1.1:
+                return False
+        return True
 
-    def validate_resolution(self) -> str:
-        """
-        Check if the image resolution is sufficient.
-        :return: Error message if resolution is too low, None otherwise.
-        """
-        if self.gray.shape[0] < 500 or self.gray.shape[1] < 800:
-            return "La resolución de la imagen es demasiado baja."
-
-    def validate_edges(self) -> str:
-        """
-        Check if the image edges are visible.
-        :return: Error message if edges are not visible, None otherwise.
-        """
-        edges = cv2.Canny(self.thresh, 50, 150)
-        if np.sum(edges) < 1000:
-            return "La imagen parece estar cortada o de baja calidad."
-
-    def validate_orientation(self) -> str:
-        """
-        Check if the image is correctly oriented.
-        :return: Error message if image is incorrectly oriented, None otherwise.
-        """
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        faces = face_cascade.detectMultiScale(self.gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-        if len(faces) > 0:
-            if faces[0][2] < faces[0][3]:  # Ancho menor que altura, posiblemente girada
-                return "La imagen parece estar orientada incorrectamente."
-
-    def validate_text_presence(self) -> str:
-        """
-        Check if the image contains text.
-        :return: Error message if no text is detected, None otherwise.
-        """
-        if not self.text.strip():
-            return "La imagen no contiene texto."
-
-    def validate(self) -> str:
-        """
-        Run all validation checks.
-        :return: Error message if any validation fails, or a success message if all checks pass.
-        """
-        self.preprocess_image()
-        self.extract_text()
-        self.clean_text()
-
-        resolution_error = self.validate_resolution()
-        if resolution_error:
-            return resolution_error
-
-        edges_error = self.validate_edges()
-        if edges_error:
-            return edges_error
-
-        orientation_error = self.validate_orientation()
-        if orientation_error:
-            return orientation_error
-
-        text_error = self.validate_text_presence()
-        if text_error:
-            return text_error
-
-        return "Validaciones comunes superadas."
-
-
-class ChileanIDFrontValidator(ChileanIDValidator):
-    """
-    Validator for the front side of a Chilean ID card.
-
-    Methods:
-    - validate: Run all validation checks specific to the front side.
-
-    Additional validations:
-    - Check for the presence of a face in the image.
-
-    Subclasses can add more specific validations as needed.
-    """
-    def validate(self) -> str:
-        """
-        Run all validation checks specific to the front side.
-        :return: Error message if any validation fails, or a success message if all checks pass.
-        """
-        common_validation = super().validate()
-        if "superadas" not in common_validation:
-            return common_validation
-
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        faces = face_cascade.detectMultiScale(self.gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-        if len(faces) == 0:
-            return "No se detectó un rostro en la imagen."
-
-        return "La imagen frontal del carnet es válida."
-
-
-class ChileanIDBackValidator(ChileanIDValidator):
-    """
-    Validator for the back side of a Chilean ID card.
-
-    Methods:
-    - validate: Run all validation checks specific to the back side.
-
-    Additional validations:
-    - Check for the presence of a fingerprint in the image.
-
-    Subclasses can add more specific validations as needed.
-    """
-    def validate(self) -> str:
-        """
-        Run all validation checks specific to the back side.
-        :return: Error message if any validation fails, or a success message if all checks pass.
-        """
-        common_validation = super().validate()
-        if "superadas" not in common_validation:
-            return common_validation
-
-        height, width = self.gray.shape
-        huella_region = self.gray[0:height // 3, width * 2 // 3:width]
-        edges = cv2.Canny(huella_region, 100, 200)
-        huella_detectada = np.sum(edges) > 5000
-        if not huella_detectada:
-            return "No se detectó una huella dactilar en la esquina superior derecha."
-
-        return "La imagen trasera del carnet es válida."
-
-
-def verify_identity_with_ai(id_image_file, face_image_file, tolerance=0.6) -> bool:
-    """
-    Verifica si la cara en la imagen de la cédula de identidad coincide con la cara en la imagen proporcionada.
-
-    :param id_image_file: Ruta al archivo de imagen de la cédula de identidad.
-    :param face_image_file: Ruta al archivo de imagen del rostro a comparar.
-    :param tolerance: Umbral para la coincidencia de rostros. Valores más bajos significan una coincidencia más estricta.
-    :return: True si las caras coinciden, False en caso contrario.
-    """
-    try:
-        id_image = face_recognition.load_image_file(id_image_file)
-        face_image = face_recognition.load_image_file(face_image_file)
-        id_face_encodings = face_recognition.face_encodings(id_image)
-        face_face_encodings = face_recognition.face_encodings(face_image)
-
-        if len(id_face_encodings) == 0:
-            print("No se detectó un rostro en la imagen de la cédula.")
+    def is_correct_orientation(self) -> bool:
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150)
+        lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+        if lines is None:
             return False
-        if len(face_face_encodings) == 0:
-            print("No se detectó un rostro en la imagen proporcionada.")
-            return False
-
-        id_face_encoding = max(id_face_encodings, key=lambda encoding: encoding.shape[0])
-
-        for face_encoding in face_face_encodings:
-            distance = face_recognition.face_distance([id_face_encoding], face_encoding)[0]
-            if distance <= tolerance:
-                print(f"Las caras coinciden con una distancia de {distance:.2f}.")
+        for line in lines:
+            rho, theta = line[0]
+            angle = np.degrees(theta)
+            if 85 < angle < 95:
                 return True
-        print("Las caras no coinciden.")
-        return False
 
-    except Exception as e:
-        print(f"Error en la verificación de identidad con IA: {e}")
-        return False
+    def has_face(self) -> bool:
+        small_image = cv2.resize(self.image, (0, 0), fx=0.5, fy=0.5)
+        face_locations = face_recognition.face_locations(small_image)
+        return len(face_locations) > 0
+
+
+class FrontIdAnalyzer(ImageAnalyzer):
+    """
+    Class for analyzing the front of an ID card.
+
+    Methods:
+    validate: Check if the image is valid
+    """
+    def validate(self) -> bool:
+        if self.is_blurry():
+            return False
+        if not self.has_text():
+            return False
+        if self.is_cut():
+            return False
+        if not self.is_correct_orientation():
+            return False
+        if not self.has_face():
+            return False
+        return True
+
+
+class BackIdAnalyzer(ImageAnalyzer):
+    """
+    Class for analyzing the back of an ID card.
+
+    Methods:
+    validate: Check if the image is valid
+    has_fingerprint: Check if the image has a fingerprint
+    """
+    def validate(self):
+        if self.is_blurry():
+            return False
+        if not self.has_text():
+            return False
+        if self.is_cut():
+            return False
+        if not self.is_correct_orientation():
+            return False
+        if not self.has_fingerprint():
+            return False
+        return True
+
+    def has_fingerprint(self) -> bool:
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=5)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=5)
+        sobel_combined = cv2.sqrt(sobelx ** 2 + sobely ** 2)
+
+        _, binary_image = cv2.threshold(sobel_combined, 100, 255, cv2.THRESH_BINARY)
+
+        contours, _ = cv2.findContours(np.uint8(binary_image), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if len(contours) > 5:
+            return True
+        else:
+            return False
+
+class FaceComparison:
+    """
+    Class for comparing a face image to an ID card image.
+
+    :param face_image: numpy array representing the face image
+    :param id_image: numpy array representing the ID card image
+
+    Methods:
+    compare_faces: Compare the face to the ID card
+    :return: bool indicating whether the face matches the ID card
+    """
+    def __init__(self, face_image, id_image):
+        self.face_image = face_image
+        self.id_image = id_image
+
+    def compare_faces(self):
+        # Resize images for consistency
+        face_image_resized = cv2.resize(self.face_image, (0, 0), fx=0.5, fy=0.5)
+        id_image_resized = cv2.resize(self.id_image, (0, 0), fx=0.5, fy=0.5)
+
+        face_encodings = face_recognition.face_encodings(face_image_resized)
+        id_face_encodings = face_recognition.face_encodings(id_image_resized)
+
+        if len(face_encodings) == 0:
+            return False
+        if len(id_face_encodings) == 0:
+            return False
+
+        face_encoding = face_encodings[0]
+        id_face_encoding = id_face_encodings[0]
+        results = face_recognition.compare_faces([id_face_encoding], face_encoding)
+        return results[0]
+
+
+class IdentityValidator:
+    """
+    Class for validating the images of a Chilean ID card.
+
+    :param front_id_image: numpy array representing the front of the ID card
+    :param back_id_image: numpy array representing the back of the ID card
+    :param face_image: numpy array representing the face image
+
+    Methods:
+    validate: Validate the images
+
+    :return: bool indicating whether the images are valid
+    """
+    def __init__(self, front_id_image, back_id_image, face_image):
+        self.front_id_analyzer = FrontIdAnalyzer(front_id_image)
+        self.back_id_analyzer = BackIdAnalyzer(back_id_image)
+        self.face_comparison = FaceComparison(face_image, front_id_image)
+
+    def validate(self):
+        if not self.front_id_analyzer.validate():
+            return False
+        elif not self.back_id_analyzer.validate():
+            return False
+        elif not self.face_comparison.compare_faces():
+            return False
+        return True

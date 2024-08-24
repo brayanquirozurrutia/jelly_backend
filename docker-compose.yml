@@ -2,8 +2,10 @@ version: '3.9'
 
 services:
   web:
-    build: .
-    command: gunicorn --workers 3 --bind 0.0.0.0:8000 --access-logfile - --error-logfile - jelly_backend.wsgi:application
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
@@ -12,42 +14,24 @@ services:
       DJANGO_ENV: ${DJANGO_ENV}
       SECRET_KEY: ${SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      - rabbitmq
+      - redis
     env_file:
       - .env
     networks:
-      - jelly_network
-    depends_on:
-      - redis
-      - rabbitmq
-
-  celery:
-    build: .
-    command: celery -A jelly_backend worker --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - web
-      - redis
-      - rabbitmq
-    environment:
-      DJANGO_ENV: ${DJANGO_ENV}
-      SECRET_KEY: ${SECRET_KEY}
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-    env_file:
-      - .env
-    networks:
-      - jelly_network
+      - jelly_network_dev
 
   redis:
     image: redis:latest
-    container_name: redis
+    ports:
+      - "6379:6379"
     networks:
-      - jelly_network
+      - jelly_network_dev
 
   rabbitmq:
-    image: rabbitmq:management
-    container_name: rabbitmq
+    image: rabbitmq:3-management
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
@@ -55,8 +39,26 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - jelly_network
+      - jelly_network_dev
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A jelly_backend worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+    environment:
+      DJANGO_ENV: ${DJANGO_ENV}
+      SECRET_KEY: ${SECRET_KEY}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+    env_file:
+      - .env
+    networks:
+      - jelly_network_dev
 
 networks:
-  jelly_network:
+  jelly_network_dev:
     driver: bridge

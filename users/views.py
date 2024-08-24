@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 from django.db import transaction
 from drf_yasg import openapi
 from rest_framework import status
@@ -5,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
+
+from users.models import User
 from users.serializers import (
     UserSerializer, UserLoginSerializer, VerifyICSerializer
 )
@@ -15,7 +19,7 @@ import os
 from dotenv import load_dotenv
 
 from users.tasks import send_activate_account_email
-from users.utils import (verify_identity_with_ai, ChileanIDFrontValidator, ChileanIDBackValidator)
+from users.utils import IdentityValidator
 from rest_framework.parsers import MultiPartParser, FormParser
 
 load_dotenv()
@@ -181,34 +185,49 @@ class VerifyICAPIView(APIView):
         request_body=VerifyICSerializer,
         responses={200: openapi.Response("Imágenes validadas exitosamente", VerifyICSerializer)},
     )
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        front_id_image = serializer.validated_data['front_id_image']
-        back_id_image = serializer.validated_data['back_id_image']
-        face_image = serializer.validated_data['face_image']
+    def post(self, request, *args, **kwargs):
+        user_id = kwargs.get('user_id')
 
-        print(front_id_image)
-        print(back_id_image)
-        print(face_image)
-        print(front_id_image.size)
-        print(back_id_image.size)
-        print(face_image.size)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'El usuario no existe.'
+            }, status=status.HTTP_404_NOT_FOUND)
 
-        front_validator = ChileanIDFrontValidator(front_id_image)
-        front_validation_result = front_validator.validate()
-        if "válida" not in front_validation_result:
-            return Response({"message": f"Error en la validación de la imagen frontal: {front_validation_result}"},
-                            status=400)
+        verified_identity = user.verified_identity
 
-        back_validator = ChileanIDBackValidator(back_id_image)
-        back_validation_result = back_validator.validate()
-        if "válida" not in back_validation_result:
-            return Response({"message": f"Error en la validación de la imagen trasera: {back_validation_result}"},
-                            status=400)
+        if not verified_identity:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            front_id_image = serializer.validated_data['front_id_image']
+            back_id_image = serializer.validated_data['back_id_image']
+            face_image = serializer.validated_data['face_image']
 
-        if not verify_identity_with_ai(front_id_image, face_image):
-            return Response({"message": "El rostro no coincide con la imagen de la cédula"}, status=400)
+            front_id_image_np = np.frombuffer(front_id_image.read(), np.uint8)
+            back_id_image_np = np.frombuffer(back_id_image.read(), np.uint8)
+            face_image_np = np.frombuffer(face_image.read(), np.uint8)
 
-        return Response({"message": "Imágenes validadas exitosamente"}, status=200)
+            front_id_image = cv2.imdecode(front_id_image_np, cv2.IMREAD_COLOR)
+            back_id_image = cv2.imdecode(back_id_image_np, cv2.IMREAD_COLOR)
+            face_image = cv2.imdecode(face_image_np, cv2.IMREAD_COLOR)
 
+            if front_id_image is None or back_id_image is None or face_image is None:
+                return Response({
+                    'error': 'Las imágenes no son válidas.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            validator = IdentityValidator(front_id_image, back_id_image, face_image)
+            if not validator.validate():
+                return Response({
+                    'error': 'Verificación fallida, por favor intente nuevamente.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            user.verified_identity = True
+            user.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'error': 'El usuario ya ha verificado su identidad.'
+            }, status=status.HTTP_400_BAD_REQUEST)

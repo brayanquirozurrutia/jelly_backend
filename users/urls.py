@@ -6,5 +6,5 @@ from users.views import (
 urlpatterns = [
     path('create/', UserCreateAPIView.as_view(), name='create_user'),
     path('login/', UserLoginAPIView.as_view(), name='login'),
-    path('verify-ic/', VerifyICAPIView.as_view(), name='verify_ic'),
+    path('verify-ic/<uuid:user_id>/', VerifyICAPIView.as_view(), name='verify_ic'),
 ]
