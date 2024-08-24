@@ -2,6 +2,42 @@
 
 Este es el README para un proyecto Django en desarrollo utilizando Docker. Aquí encontrarás las instrucciones necesarias para configurar y ejecutar el entorno de desarrollo.
 
+## Estructura del Proyecto
+
+```bash
+.
+├── apps/
+├── jelly_backend/
+│   ├── celelery/
+│   ├── docs/
+│   ├── one_signal/
+├── nginx/
+├── staticfiles/
+├── .Dockerignore
+├── .env
+├── .gitignore
+├── CACHE.md
+├── docker-compose.yml
+├── Dockerfile
+├── manage.py
+├── README.md
+├── requirements.txt
+└── robots.txt
+```
+
+## Tecnologías Utilizadas
+
+- [Django REST Framework](https://www.django-rest-framework.org/)
+- [Celery](https://docs.celeryproject.org/en/stable/)
+- [Redis](https://redis.io/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Nginx](https://www.nginx.com/)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Swagger](https://swagger.io/)
+- [OneSignal](https://onesignal.com/)
+
 ## Requisitos Previos
 
 Asegúrate de tener instalados los siguientes programas:
@@ -31,11 +67,24 @@ Asegúrate de tener instalados los siguientes programas:
 3. **Construir y levantar los servicios:**
 
    ```bash
-   docker-compose -f docker-compose.dev.yml up --build
+   docker-compose up --build
 
-4. **Acceder a la aplicación:**
+4. **Ejecutar las migraciones:**
 
-   La aplicación estará disponible en [http://localhost:8000](http://localhost:8000)
+   ```bash
+   docker-compose exec web python manage.py makemigrations
+   docker-compose exec web python manage.py migrate
 
+5. **El proyecto estará disponible en la dirección http://localhost:8000/**
 
-docker-compose -f docker-compose.dev.yml down
+6. **El proyecto posee swagger para la documentación de la API, la cual estará disponible en la dirección http://localhost:8000/swagger/**
+
+7. **Detener los servicios:**
+
+   ```bash
+   docker-compose down
+
+8. **Volver a levantar los servicios:**
+
+   ```bash
+   docker-compose up
